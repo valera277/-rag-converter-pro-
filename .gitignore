@@ -26,6 +26,7 @@ migrations/versions/*.pyc
 uploads/
 *.pdf
 *.txt
+!requirements.txt
 
 # IDE
 .vscode/
