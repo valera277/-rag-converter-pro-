@@ -1,7 +1,7 @@
 import os
 import re
 import uuid
-from flask import render_template, redirect, url_for, flash, request, current_app, send_file, after_this_request
+from flask import render_template, redirect, url_for, flash, request, current_app, send_file, after_this_request, Response
 from flask_login import login_required, current_user
 from werkzeug.utils import secure_filename
 from app import db
@@ -98,6 +98,35 @@ def validate_file_content(filepath, expected_ext):
 def index():
     """Главная страница сайта."""
     return render_template('index.html')
+
+
+@bp.route('/robots.txt')
+def robots_txt():
+    base_url = request.url_root.rstrip('/')
+    content = f"""User-agent: *
+Allow: /
+
+Sitemap: {base_url}/sitemap.xml
+"""
+    return Response(content, mimetype='text/plain')
+
+
+@bp.route('/sitemap.xml')
+def sitemap_xml():
+    base_url = request.url_root.rstrip('/')
+    urls = [
+        f"{base_url}{url_for('main.index')}",
+    ]
+    items = "\n".join(
+        f"<url><loc>{u}</loc><changefreq>weekly</changefreq><priority>1.0</priority></url>"
+        for u in urls
+    )
+    xml = f"""<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+{items}
+</urlset>
+"""
+    return Response(xml, mimetype='application/xml')
 
 
 @bp.route('/dashboard')
