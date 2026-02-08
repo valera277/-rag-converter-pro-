@@ -1,0 +1,169 @@
+{% extends "base.html" %}
+
+{% block title %}Convert - RAG Converter Pro{% endblock %}
+
+{% block content %}
+<div style="padding-top: 120px;">
+    <div class="container" style="max-width: 700px;">
+        <div class="card">
+            <div class="card-header" style="text-align: center;">
+                <h1 class="card-title">Convert Document</h1>
+                <p class="card-subtitle">Upload PDF or TXT file for processing</p>
+            </div>
+
+            <form method="POST" action="{{ url_for('main.convert') }}" enctype="multipart/form-data" id="uploadForm">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <div class="upload-zone" id="uploadZone">
+                    <div class="upload-zone-icon">📁</div>
+                    <div class="upload-zone-text">Drag & Drop file here</div>
+                    <div class="upload-zone-hint">or click to browse</div>
+                    <div class="upload-zone-hint" style="margin-top: 8px;">Supported formats: PDF, TXT (up to 16MB)
+                    </div>
+                    <input type="file" name="file" id="fileInput" accept=".pdf,.txt" style="display: none;" required>
+                </div>
+
+                <div id="selectedFile"
+                    style="display: none; margin-top: 20px; padding: 16px; background: var(--surface-light); border-radius: var(--border-radius);">
+                    <div style="display: flex; align-items: center; justify-content: space-between;">
+                        <div>
+                            <div style="font-weight: 600;" id="fileName"></div>
+                            <div style="color: var(--text-muted); font-size: 0.875rem;" id="fileSize"></div>
+                        </div>
+                        <button type="button" id="removeFile" class="btn btn-secondary"
+                            style="padding: 8px 16px;">✕</button>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 24px;" id="submitBtn"
+                    disabled>
+                    Convert
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    const uploadZone = document.getElementById('uploadZone');
+    const fileInput = document.getElementById('fileInput');
+    const selectedFile = document.getElementById('selectedFile');
+    const fileName = document.getElementById('fileName');
+    const fileSize = document.getElementById('fileSize');
+    const removeFile = document.getElementById('removeFile');
+    const submitBtn = document.getElementById('submitBtn');
+
+    // Click to upload
+    uploadZone.addEventListener('click', () => fileInput.click());
+
+    // Drag and drop
+    uploadZone.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        uploadZone.classList.add('dragover');
+    });
+
+    uploadZone.addEventListener('dragleave', () => {
+        uploadZone.classList.remove('dragover');
+    });
+
+    uploadZone.addEventListener('drop', (e) => {
+        e.preventDefault();
+        uploadZone.classList.remove('dragover');
+        const files = e.dataTransfer.files;
+        if (files.length) {
+            fileInput.files = files;
+            showSelectedFile(files[0]);
+        }
+    });
+
+    // File selected
+    fileInput.addEventListener('change', (e) => {
+        if (e.target.files.length) {
+            showSelectedFile(e.target.files[0]);
+        }
+    });
+
+    // Remove file
+    removeFile.addEventListener('click', () => {
+        fileInput.value = '';
+        selectedFile.style.display = 'none';
+        uploadZone.style.display = 'block';
+        submitBtn.disabled = true;
+    });
+
+    function showSelectedFile(file) {
+        fileName.textContent = file.name;
+        fileSize.textContent = formatFileSize(file.size);
+        selectedFile.style.display = 'block';
+        uploadZone.style.display = 'none';
+        submitBtn.disabled = false;
+    }
+
+    function formatFileSize(bytes) {
+        if (bytes < 1024) return bytes + ' B';
+        if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+        return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+    }
+
+    // Form submit loading state
+    document.getElementById('uploadForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        const originalText = submitBtn.textContent;
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Processing...';
+
+        const formData = new FormData(e.target);
+
+        try {
+            const response = await fetch(e.target.action, {
+                method: 'POST',
+                body: formData
+            });
+
+            const contentDisposition = response.headers.get('Content-Disposition');
+
+            if (response.ok && contentDisposition && contentDisposition.includes('attachment')) {
+                // This is a file download
+                const blob = await response.blob();
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+
+                // Try to get filename from header
+                let filename = 'dataset.md';
+                const filenameMatch = contentDisposition.match(/filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/);
+                if (filenameMatch && filenameMatch[1]) {
+                    filename = filenameMatch[1].replace(/['"]/g, '');
+                }
+                a.download = filename;
+
+                document.body.appendChild(a);
+                a.click();
+                window.URL.revokeObjectURL(url);
+                a.remove();
+
+                // Reset button
+                submitBtn.textContent = 'Done!';
+                setTimeout(() => {
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = originalText;
+                }, 2000);
+
+            } else {
+                // If not a file, render the response (likely an error page)
+                const html = await response.text();
+                document.open();
+                document.write(html);
+                document.close();
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            alert('An error occurred during request.');
+            submitBtn.disabled = false;
+            submitBtn.textContent = originalText;
+        }
+    });
+</script>
+{% endblock %}

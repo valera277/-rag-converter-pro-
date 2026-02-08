@@ -1,0 +1,98 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - RAG Converter Pro{% endblock %}
+
+{% block content %}
+<div style="padding-top: 120px;">
+    <div class="container">
+        <h1 style="font-size: 2.5rem; margin-bottom: 8px;">Welcome!</h1>
+        <p style="color: var(--text-muted); margin-bottom: 40px;">{{ current_user.email }}</p>
+
+        <!-- Stats Grid -->
+        <div class="dashboard-grid">
+            <div class="stat-card">
+                <div class="stat-label">Subscription Status</div>
+                <div style="margin-top: 8px;">
+                    {% if subscription_status == 'active' %}
+                    <span class="badge badge-success">Active</span>
+                    {% elif subscription_status == 'cancelled' %}
+                    <span class="badge badge-warning">Cancelled (Active)</span>
+                    <div style="font-size: 0.8rem; margin-top: 4px; color: var(--text-muted);">
+                        Expires: {{ current_user.subscription.expires_at.strftime('%d.%m.%Y') }}
+                    </div>
+                    {% elif subscription_status == 'inactive' %}
+                    <span class="badge badge-error">Inactive</span>
+                    {% else %}
+                    <span class="badge badge-warning">Free Tier</span>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-label">Conversions Remaining</div>
+                <div class="stat-value">{{ free_remaining }}</div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-label">Quick Actions</div>
+                <div style="margin-top: 16px; display: flex; gap: 12px; flex-wrap: wrap;">
+                    <a href="{{ url_for('main.convert') }}" class="btn btn-primary">Convert File</a>
+                    {% if subscription_status not in ['active', 'cancelled'] %}
+                    <a href="{{ url_for('payment.subscribe') }}" class="btn btn-secondary">Subscribe</a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- History -->
+        <div class="card" style="margin-top: 40px;">
+            <div class="card-header">
+                <h2 class="card-title">Conversion History</h2>
+                <p class="card-subtitle">Last 10 operations</p>
+            </div>
+
+            {% if history %}
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Filename</th>
+                        <th>Chunks</th>
+                        <th>Date</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in history %}
+                    <tr>
+                        <td>{{ item.filename }}</td>
+                        <td>{{ item.chunks_count }}</td>
+                        <td>{{ item.created_at.strftime('%d.%m.%Y %H:%M') }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+            <p style="color: var(--text-muted); text-align: center; padding: 40px;">
+                No conversion history. <a href="{{ url_for('main.convert') }}" style="color: var(--primary);">Start
+                    now!</a>
+            </p>
+            {% endif %}
+        </div>
+
+        <!-- Subscription Management -->
+        {% if subscription_status == 'active' %}
+        <div class="card" style="margin-top: 24px;">
+            <div class="card-header">
+                <h2 class="card-title">Subscription Management</h2>
+            </div>
+            <p style="color: var(--text-muted); margin-bottom: 16px;">Your subscription is active. You can cancel it at
+                any time.</p>
+            <form method="POST" action="{{ url_for('payment.cancel') }}"
+                onsubmit="return confirm('Are you sure you want to cancel your subscription?');">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <button type="submit" class="btn btn-danger">Cancel Subscription</button>
+            </form>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

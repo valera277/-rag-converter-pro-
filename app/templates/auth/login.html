@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+
+{% block title %}Login - RAG Converter Pro{% endblock %}
+
+{% block content %}
+<div class="auth-container">
+    <div class="auth-card card">
+        <a href="{{ url_for('main.index') }}" class="logo">RAG Converter Pro</a>
+
+        <div class="card-header" style="text-align: center;">
+            <h2 class="card-title">Login to your account</h2>
+            <p class="card-subtitle">Enter your account details</p>
+        </div>
+
+        <form method="POST" action="{{ url_for('auth.login') }}">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <div class="form-group">
+                <label class="form-label" for="email">Email</label>
+                <input type="email" id="email" name="email" class="form-input" placeholder="your@email.com" required>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="password">Password</label>
+                <input type="password" id="password" name="password" class="form-input" placeholder="••••••••" required>
+            </div>
+
+            <div class="form-group" style="display: flex; align-items: center; gap: 8px;">
+                <input type="checkbox" id="remember" name="remember" style="width: 18px; height: 18px;">
+                <label for="remember" style="color: var(--text-muted); cursor: pointer;">Remember me</label>
+            </div>
+
+            <button type="submit" class="btn btn-primary" style="width: 100%;">Login</button>
+        </form>
+
+        <p style="text-align: center; margin-top: 24px; color: var(--text-muted);">
+            No account? <a href="{{ url_for('auth.register') }}" style="color: var(--primary);">Register</a>
+        </p>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+
+{% block title %}Subscribe - RAG Converter Pro{% endblock %}
+
+{% block content %}
+<div style="padding-top: 120px;">
+    <div class="container" style="max-width: 600px;">
+        <div style="text-align: center; margin-bottom: 40px;">
+            <h1 style="font-size: 2.5rem; margin-bottom: 16px;">Subscribe Now</h1>
+            <p style="color: var(--text-muted);">Unlimited conversions for {{ price }} UAH/month</p>
+        </div>
+
+        <div class="pricing-card">
+            <span class="pricing-badge">Pro Subscription</span>
+            <h3 style="font-size: 1.5rem; margin-top: 16px;">RAG Converter Pro</h3>
+            <div class="pricing-amount">{{ price }}<span> UAH/mo</span></div>
+
+            <ul class="pricing-features">
+                <li>Unlimited Conversions</li>
+                <li>Support for PDF & TXT</li>
+                <li>Smart Text Cleaning</li>
+                <li>Optimal Chunking</li>
+                <li>Operation History</li>
+                <li>Cancel Anytime</li>
+            </ul>
+
+            <!-- LiqPay Payment Form -->
+            <form method="POST" action="{{ liqpay_data.checkout_url }}" accept-charset="utf-8">
+                <input type="hidden" name="data" value="{{ liqpay_data.data }}">
+                <input type="hidden" name="signature" value="{{ liqpay_data.signature }}">
+                <button type="submit" class="btn btn-primary" style="width: 100%;">
+                    Pay with LiqPay
+                </button>
+            </form>
+
+            <p style="margin-top: 20px; font-size: 0.875rem; color: var(--text-muted);">
+                Secure payment via LiqPay. Subscription automatically renews every month.
+            </p>
+        </div>
+
+        <div style="text-align: center; margin-top: 32px;">
+            <a href="{{ url_for('main.dashboard') }}" style="color: var(--text-muted);">← Back to Dashboard</a>
+        </div>
+    </div>
+</div>
+{% endblock %}
