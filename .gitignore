@@ -16,6 +16,7 @@ instance/
 # Environment
 .env
 .env.local
+!runtime.txt
 
 # Database
 *.db
