@@ -181,7 +181,12 @@ def convert():
                 return redirect(request.url)
             
             # Обработка файла (конвертация)
-            result_path, chunks_count = process_files([filepath])
+            result_path, chunks_count = process_files(
+                [filepath],
+                max_pdf_pages=current_app.config.get('MAX_PDF_PAGES'),
+                max_text_chars=current_app.config.get('MAX_TEXT_CHARS'),
+                max_chunks=current_app.config.get('MAX_CHUNKS')
+            )
             
             # Удаление временного загруженного файла
             if os.path.exists(filepath):
@@ -220,7 +225,13 @@ def convert():
             if os.path.exists(filepath):
                 os.remove(filepath)
             current_app.logger.error(f'Conversion error for user {current_user.id}: {str(e)}')
-            flash('Error processing file. Please try another file.', 'error')
+            if isinstance(e, ValueError):
+                flash(str(e), 'error')
+            else:
+                flash('Error processing file. Please try another file.', 'error')
             return redirect(request.url)
     
-    return render_template('convert.html')
+    return render_template(
+        'convert.html',
+        max_pdf_pages=current_app.config.get('MAX_PDF_PAGES')
+    )

@@ -32,6 +32,9 @@ class Config:
     UPLOAD_FOLDER = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'uploads')
     MAX_CONTENT_LENGTH = 16 * 1024 * 1024  # Максимальный размер файла: 16MB
     ALLOWED_EXTENSIONS = {'txt', 'pdf'}  # Разрешенные расширения
+    MAX_PDF_PAGES = 100  # Лимит страниц PDF для защиты от таймаутов
+    MAX_TEXT_CHARS = 500_000  # Лимит символов текста для защиты от таймаутов
+    MAX_CHUNKS = 5000  # Ограничение числа чанков для защиты от OOM
     
     # ===== НАСТРОЙКИ БЕЗОПАСНОСТИ =====
     
