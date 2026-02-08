@@ -40,6 +40,9 @@ class Config:
     SESSION_COOKIE_HTTPONLY = True  # Запретить JavaScript доступ к кукам сессии
     SESSION_COOKIE_SAMESITE = 'Lax'  # Защита от CSRF через кросс-сайтовые запросы
     PERMANENT_SESSION_LIFETIME = 3600  # Время жизни сессии: 1 час
+    REMEMBER_COOKIE_SECURE = True
+    REMEMBER_COOKIE_HTTPONLY = True
+    REMEMBER_COOKIE_SAMESITE = 'Lax'
     
     # CSRF защита
     WTF_CSRF_ENABLED = True  # Включить CSRF защиту

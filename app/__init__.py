@@ -25,6 +25,11 @@ def create_app(config_class=Config):
     """
     app = Flask(__name__)
     app.config.from_object(config_class)
+
+    # Force-safe defaults in production
+    if os.environ.get('FLASK_ENV') == 'production':
+        app.config['DEBUG'] = False
+        app.config['TESTING'] = False
     
     # Initialize extensions with the app
     db.init_app(app)
@@ -104,6 +109,10 @@ def create_app(config_class=Config):
         app.logger.addHandler(file_handler)
         app.logger.setLevel(logging.INFO)
         app.logger.info('RAG Converter startup')
+
+        # Warn if SECRET_KEY is still the default (unsafe for production)
+        if app.config.get('SECRET_KEY') == 'dev-secret-key-change-me':
+            app.logger.warning('SECURITY: SECRET_KEY is default. Set SECRET_KEY in environment.')
     
     with app.app_context():
         db.create_all()
