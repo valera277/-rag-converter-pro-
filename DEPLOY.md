@@ -256,11 +256,11 @@ FLASK_ENV=production
 SECRET_KEY=<нажмите Generate для автогенерации>
 DATABASE_URL=<вставьте Internal Database URL из шага 3.2>
 
-# WayForPay
-WAYFORPAY_MERCHANT_ACCOUNT=<your_merchant_account>
-WAYFORPAY_SECRET_KEY=<your_secret_key>
-WAYFORPAY_MERCHANT_PASSWORD=<your_merchant_password>
-WAYFORPAY_MERCHANT_DOMAIN=<your_domain>
+# Paddle
+PADDLE_CLIENT_TOKEN=<your_client_token>
+PADDLE_PRICE_ID=<your_price_id>
+PADDLE_WEBHOOK_SECRET=<your_webhook_secret>
+PADDLE_ENV=live
 
 # Настройки приложения
 FREE_CONVERSIONS_LIMIT=3
@@ -276,6 +276,9 @@ MAX_CONTENT_LENGTH=16777216
    - Установит зависимости
    - Запустит приложение
 3. Процесс займет 3-5 минут
+
+Также в Paddle укажите webhook URL:
+`https://ваш-домен/payment/paddle/webhook`
 
 ### 3.6. Инициализация базы данных
 

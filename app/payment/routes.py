@@ -1,189 +1,149 @@
-﻿import uuid
-import logging
+﻿import json
+import hmac
+import hashlib
 from datetime import datetime, timedelta
-from flask import render_template, redirect, url_for, flash, request, current_app, jsonify
+from flask import render_template, redirect, url_for, flash, request, current_app
 from flask_login import login_required, current_user
 from app import db
 from app.payment import bp
-from app.payment.wayforpay_client import WayForPayClient
-
-logger = logging.getLogger(__name__)
 
 
-def validate_order_id_format(order_id):
-    """
-    Validate orderReference format: sub_USERID_HASH
-    Returns user_id if valid, otherwise None.
-    """
-    if not order_id or not isinstance(order_id, str):
+def _parse_rfc3339(dt_str):
+    if not dt_str:
         return None
-
-    parts = order_id.split('_')
-    if len(parts) != 3 or parts[0] != 'sub':
-        return None
-
     try:
-        user_id = int(parts[1])
-        if len(parts[2]) != 8:
-            return None
-        int(parts[2], 16)
-        return user_id
-    except (ValueError, TypeError):
+        return datetime.fromisoformat(dt_str.replace('Z', '+00:00'))
+    except Exception:
         return None
+
+
+def _verify_paddle_signature(raw_body, signature_header, secret_key):
+    if not signature_header or not secret_key:
+        return False
+    try:
+        parts = signature_header.split(';')
+        ts = None
+        h1 = None
+        for part in parts:
+            if part.startswith('ts='):
+                ts = part.split('=', 1)[1]
+            elif part.startswith('h1='):
+                h1 = part.split('=', 1)[1]
+        if not ts or not h1:
+            return False
+        signed_payload = (ts + ':').encode('utf-8') + raw_body
+        expected = hmac.new(
+            secret_key.encode('utf-8'),
+            signed_payload,
+            hashlib.sha256
+        ).hexdigest()
+        return hmac.compare_digest(expected, h1)
+    except Exception:
+        return False
 
 
 @bp.route('/subscribe')
 @login_required
 def subscribe():
-    """
-    Subscription checkout page.
-    Generates WayForPay payment form.
-    """
     if current_user.subscription and current_user.subscription.status in ['active', 'cancelled']:
         flash('You already have an active subscription.', 'info')
         return redirect(url_for('main.dashboard'))
 
-    if not current_app.config.get('WAYFORPAY_MERCHANT_ACCOUNT') or not current_app.config.get('WAYFORPAY_SECRET_KEY'):
-        logger.error('WayForPay keys not configured')
+    if not current_app.config.get('PADDLE_CLIENT_TOKEN') or not current_app.config.get('PADDLE_PRICE_ID'):
         flash('Payment system temporarily unavailable.', 'error')
-        return redirect(url_for('main.dashboard'))
-
-    wfp = WayForPayClient()
-
-    order_id = f"sub_{current_user.id}_{uuid.uuid4().hex[:8]}"
-
-    result_url = url_for('main.dashboard', _external=True)
-    server_url = url_for('payment.callback', _external=True)
-
-    try:
-        form_data = wfp.build_subscription_form(
-            order_reference=order_id,
-            amount=current_app.config['SUBSCRIPTION_PRICE'],
-            product_name='RAG Converter Pro - Monthly Subscription',
-            result_url=result_url,
-            service_url=server_url
-        )
-    except Exception as e:
-        logger.error(f'Error creating WayForPay form: {e}')
-        flash('Error creating payment form.', 'error')
         return redirect(url_for('main.dashboard'))
 
     return render_template(
         'subscribe.html',
-        wfp_data=form_data,
-        price=current_app.config['SUBSCRIPTION_PRICE']
+        price=current_app.config['SUBSCRIPTION_PRICE'],
+        paddle_token=current_app.config['PADDLE_CLIENT_TOKEN'],
+        paddle_env=current_app.config.get('PADDLE_ENV', 'live'),
+        paddle_price_id=current_app.config['PADDLE_PRICE_ID'],
+        user_email=current_user.email,
+        user_id=current_user.id,
     )
 
 
-@bp.route('/callback', methods=['POST'])
-def callback():
-    """
-    WayForPay callback.
-    Verifies signature and updates subscription status.
-    """
-    payload = request.get_json(silent=True) or request.form.to_dict(flat=True)
+@bp.route('/paddle/webhook', methods=['POST'])
+def paddle_webhook():
+    raw_body = request.get_data(cache=False) or b''
+    signature_header = request.headers.get('Paddle-Signature', '')
+    secret = current_app.config.get('PADDLE_WEBHOOK_SECRET')
 
-    logger.info(f'Получен callback WayForPay с IP {request.remote_addr}')
-
-    if not payload:
-        logger.warning('Callback WayForPay: пустой payload')
-        return 'Empty payload', 400
-
-    if not current_app.config.get('WAYFORPAY_SECRET_KEY'):
-        logger.error('Callback WayForPay: SECRET_KEY не настроен')
-        return 'Server configuration error', 500
-
-    wfp = WayForPayClient()
-    if not wfp.verify_callback_signature(payload):
-        logger.warning(f'Callback WayForPay: неверная подпись с IP {request.remote_addr}')
+    if not _verify_paddle_signature(raw_body, signature_header, secret):
         return 'Invalid signature', 403
 
-    order_id = payload.get('orderReference', '')
-    status = payload.get('transactionStatus')
+    try:
+        payload = json.loads(raw_body.decode('utf-8'))
+    except Exception:
+        return 'Invalid payload', 400
 
-    logger.info(f'Callback WayForPay: заказ={order_id}, статус={status}')
+    event_type = payload.get('event_type')
+    data = payload.get('data', {})
+    custom_data = data.get('custom_data') or data.get('customData') or {}
+    user_id = custom_data.get('user_id')
 
-    user_id = validate_order_id_format(order_id)
-    if user_id is None:
-        logger.warning(f'Callback WayForPay: неверный формат orderReference: {order_id}')
-        return 'Invalid orderReference', 400
+    if not user_id:
+        return 'OK', 200
 
     from app.models import User, Subscription
-    user = User.query.get(user_id)
-
+    user = User.query.get(int(user_id))
     if not user:
-        logger.warning(f'Callback WayForPay: пользователь не найден: {user_id}')
-        return 'User not found', 404
+        return 'OK', 200
+
+    subscription_id = data.get('id') if data else None
+    status = data.get('status') if isinstance(data, dict) else None
+
+    # Ensure subscription record exists
+    if not user.subscription:
+        subscription = Subscription(user_id=user.id, status='free_tier')
+        db.session.add(subscription)
+        db.session.commit()
 
     try:
-        if status in ['Approved', 'Success', 'success']:
-            if user.subscription:
-                user.subscription.status = 'active'
-                user.subscription.liqpay_order_id = order_id
-                user.subscription.expires_at = datetime.utcnow() + timedelta(days=30)
-            else:
-                subscription = Subscription(
-                    user_id=user.id,
-                    status='active',
-                    liqpay_order_id=order_id,
-                    expires_at=datetime.utcnow() + timedelta(days=30)
-                )
-                db.session.add(subscription)
-
+        # Activated subscription
+        if event_type == 'subscription.activated' or (status == 'active' and event_type == 'subscription.updated'):
+            user.subscription.status = 'active'
+            if subscription_id:
+                user.subscription.liqpay_order_id = subscription_id
+            ends_at = None
+            current_period = data.get('current_billing_period') if isinstance(data, dict) else None
+            if current_period:
+                ends_at = _parse_rfc3339(current_period.get('ends_at'))
+            if not ends_at:
+                ends_at = datetime.utcnow() + timedelta(days=30)
+            user.subscription.expires_at = ends_at
             db.session.commit()
-            logger.info(f'Подписка активирована для пользователя {user_id}')
 
-        elif status in ['Declined', 'Expired', 'Refunded', 'Failure', 'Error', 'Cancelled', 'Voided']:
-            if user.subscription:
-                user.subscription.status = 'inactive'
-                db.session.commit()
-                logger.info(f'Подписка деактивирована для пользователя {user_id}, статус: {status}')
-        else:
-            logger.info(f'Callback WayForPay: необработанный статус {status} для заказа {order_id}')
+        # Canceled subscription
+        elif event_type == 'subscription.canceled' or status == 'canceled':
+            user.subscription.status = 'cancelled'
+            current_period = data.get('current_billing_period') if isinstance(data, dict) else None
+            ends_at = None
+            if current_period:
+                ends_at = _parse_rfc3339(current_period.get('ends_at'))
+            if not ends_at:
+                ends_at = datetime.utcnow()
+            user.subscription.expires_at = ends_at
+            db.session.commit()
 
-    except Exception as e:
+    except Exception:
         db.session.rollback()
-        logger.error(f'Ошибка базы данных в callback WayForPay: {e}')
         return 'Database error', 500
 
-    response_payload = wfp.build_callback_response(order_id, status='accept')
-    return jsonify(response_payload), 200
+    return 'OK', 200
 
 
 @bp.route('/cancel', methods=['POST'])
 @login_required
 def cancel():
-    """
-    Cancel subscription.
-    Deactivates user subscription and stops recurring payments in WayForPay.
-    """
     if not current_user.subscription or current_user.subscription.status != 'active':
         flash('No active subscription to cancel.', 'warning')
         return redirect(url_for('main.dashboard'))
 
-    try:
-        wfp = WayForPayClient()
-        order_id = current_user.subscription.liqpay_order_id
-
-        if order_id:
-            logger.info(f'Subscription cancellation request for order {order_id}')
-            payload = wfp.regular_request_payload('REMOVE', order_id)
-            try:
-                import requests
-                response = requests.post(wfp.REGULAR_API_URL, json=payload, timeout=10)
-                response.raise_for_status()
-                logger.info(f'WayForPay regularApi response: {response.text}')
-            except Exception as e:
-                logger.warning(f'WayForPay regularApi error: {e}')
-
-        current_user.subscription.status = 'cancelled'
-        db.session.commit()
-
-        flash('Subscription cancelled. It will remain active until the end of the paid period.', 'info')
-
-    except Exception as e:
-        db.session.rollback()
-        logger.error(f'Error cancelling subscription: {e}')
-        flash('Error cancelling subscription. Please try again later.', 'error')
-
+    # Paddle cancellation is handled via Paddle customer portal or API.
+    # We only mark as cancelled locally; Paddle webhook will sync final status.
+    current_user.subscription.status = 'cancelled'
+    db.session.commit()
+    flash('Subscription cancellation requested. It will remain active until the end of the paid period.', 'info')
     return redirect(url_for('main.dashboard'))

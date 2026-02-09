@@ -20,11 +20,11 @@ class Config:
         'postgresql://postgres:password@localhost:5432/rag_converter'
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     
-    # ===== НАСТРОЙКИ WayForPay =====
-    WAYFORPAY_MERCHANT_ACCOUNT = os.environ.get('WAYFORPAY_MERCHANT_ACCOUNT')
-    WAYFORPAY_SECRET_KEY = os.environ.get('WAYFORPAY_SECRET_KEY')
-    WAYFORPAY_MERCHANT_PASSWORD = os.environ.get('WAYFORPAY_MERCHANT_PASSWORD')
-    WAYFORPAY_MERCHANT_DOMAIN = os.environ.get('WAYFORPAY_MERCHANT_DOMAIN')
+    # ===== НАСТРОЙКИ Paddle =====
+    PADDLE_CLIENT_TOKEN = os.environ.get('PADDLE_CLIENT_TOKEN')
+    PADDLE_PRICE_ID = os.environ.get('PADDLE_PRICE_ID')
+    PADDLE_WEBHOOK_SECRET = os.environ.get('PADDLE_WEBHOOK_SECRET')
+    PADDLE_ENV = os.environ.get('PADDLE_ENV', 'live')
     
     # ===== ЛИМИТЫ И ТАРИФЫ =====
     FREE_CONVERSIONS_LIMIT = 3  # Количество бесплатных конвертаций
@@ -65,7 +65,7 @@ class Config:
         'X-Frame-Options': 'SAMEORIGIN',  # Защита от кликджекинга
         'X-XSS-Protection': '1; mode=block',  # Защита от XSS
         'Strict-Transport-Security': 'max-age=31536000; includeSubDomains',  # Принудительный HTTPS
-        'Content-Security-Policy': "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data:; form-action 'self' https://secure.wayforpay.com"
+        'Content-Security-Policy': "default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.paddle.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data:; frame-src 'self' https://checkout.paddle.com https://*.paddle.com; form-action 'self' https://checkout.paddle.com"
     }
 
 

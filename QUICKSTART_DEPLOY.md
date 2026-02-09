@@ -85,14 +85,15 @@ git push
    FLASK_ENV=production
    SECRET_KEY=<Generate>
    DATABASE_URL=<Internal Database URL из шага 2>
-   WAYFORPAY_MERCHANT_ACCOUNT=<your_merchant_account>
-   WAYFORPAY_SECRET_KEY=<your_secret_key>
-   WAYFORPAY_MERCHANT_PASSWORD=<your_merchant_password>
-   WAYFORPAY_MERCHANT_DOMAIN=<your_domain>
+   PADDLE_CLIENT_TOKEN=<your_client_token>
+   PADDLE_PRICE_ID=<your_price_id>
+   PADDLE_WEBHOOK_SECRET=<your_webhook_secret>
+   PADDLE_ENV=live
    FREE_CONVERSIONS_LIMIT=5
    SUBSCRIPTION_PRICE=99
    PYTHON_VERSION = 3.12.7
    ```
+   В Paddle настройте webhook: `https://ваш-домен/payment/paddle/webhook`
 
 5. **Создайте сервис** → Подождите 5 минут
 
