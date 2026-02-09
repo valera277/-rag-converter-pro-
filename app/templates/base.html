@@ -8,15 +8,18 @@
     <meta name="author" content="RAG Converter Pro">
     <meta name="robots" content="index, follow">
     <link rel="canonical" href="{{ request.url }}">
+    {% block og_title %}RAG Converter Pro{% endblock %}
+    {% block og_description %}Convert PDF and TXT into clean, chunked datasets for RAG systems.{% endblock %}
+    {% block og_type %}website{% endblock %}
     <meta property="og:site_name" content="RAG Converter Pro">
-    <meta property="og:type" content="{% block og_type %}website{% endblock %}">
-    <meta property="og:title" content="{% block og_title %}RAG Converter Pro{% endblock %}">
-    <meta property="og:description" content="{% block og_description %}Convert PDF and TXT into clean, chunked datasets for RAG systems.{% endblock %}">
+    <meta property="og:type" content="{{ self.og_type() }}">
+    <meta property="og:title" content="{{ self.og_title() }}">
+    <meta property="og:description" content="{{ self.og_description() }}">
     <meta property="og:url" content="{{ request.url }}">
     <meta property="og:image" content="{{ url_for('static', filename='images/og-cover.png', _external=True) }}">
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="{% block og_title %}RAG Converter Pro{% endblock %}">
-    <meta name="twitter:description" content="{% block og_description %}Convert PDF and TXT into clean, chunked datasets for RAG systems.{% endblock %}">
+    <meta name="twitter:title" content="{{ self.og_title() }}">
+    <meta name="twitter:description" content="{{ self.og_description() }}">
     <meta name="twitter:image" content="{{ url_for('static', filename='images/og-cover.png', _external=True) }}">
     <meta name="google-site-verification" content="aJY0sAinnXpSVU4SgTE3mWsd_mnt8UnidcHyVRcwIIU">
     <title>{% block title %}RAG Converter Pro{% endblock %}</title>
