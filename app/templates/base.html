@@ -5,6 +5,19 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="{% block meta_description %}RAG Converter Pro - Convert PDF and TXT files for RAG systems{% endblock %}">
+    <meta name="author" content="RAG Converter Pro">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="{{ request.url }}">
+    <meta property="og:site_name" content="RAG Converter Pro">
+    <meta property="og:type" content="{% block og_type %}website{% endblock %}">
+    <meta property="og:title" content="{% block og_title %}RAG Converter Pro{% endblock %}">
+    <meta property="og:description" content="{% block og_description %}Convert PDF and TXT into clean, chunked datasets for RAG systems.{% endblock %}">
+    <meta property="og:url" content="{{ request.url }}">
+    <meta property="og:image" content="{{ url_for('static', filename='images/og-cover.png', _external=True) }}">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="{% block og_title %}RAG Converter Pro{% endblock %}">
+    <meta name="twitter:description" content="{% block og_description %}Convert PDF and TXT into clean, chunked datasets for RAG systems.{% endblock %}">
+    <meta name="twitter:image" content="{{ url_for('static', filename='images/og-cover.png', _external=True) }}">
     <meta name="google-site-verification" content="aJY0sAinnXpSVU4SgTE3mWsd_mnt8UnidcHyVRcwIIU">
     <title>{% block title %}RAG Converter Pro{% endblock %}</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -57,6 +70,8 @@
                 <a href="{{ url_for('main.terms_and_conditions') }}">Terms</a>
                 | <a href="{{ url_for('main.privacy_policy') }}">Privacy</a>
                 | <a href="{{ url_for('main.refund_policy') }}">Refunds</a>
+                | <a href="{{ url_for('main.about') }}">About</a>
+                | <a href="{{ url_for('main.faq') }}">FAQ</a>
             </p>
         </div>
     </footer>

@@ -1,14 +1,15 @@
-{% extends "base.html" %}
+﻿{% extends "base.html" %}
 
 {% block title %}RAG Converter Pro - Convert PDF & TXT for RAG{% endblock %}
 {% block meta_description %}Convert PDF and TXT into clean, chunked datasets for RAG systems. Fast upload, smart cleaning, ready-to-use output.{% endblock %}
+{% block og_title %}RAG Converter Pro{% endblock %}
+{% block og_description %}Convert PDF and TXT into clean, chunked datasets for RAG systems. Fast upload, smart cleaning, ready-to-use output.{% endblock %}
 
 {% block content %}
 <section class="hero">
     <div class="container">
         <h1 class="animate-in">Convert Documents for RAG Systems</h1>
-        <p class="animate-in">Upload PDF or TXT files — get a ready-to-use dataset for AI model training with chunking
-            and text cleaning.</p>
+        <p class="animate-in">Upload PDF or TXT files — get a ready-to-use dataset for AI assistants, search, and RAG pipelines with chunking and smart text cleaning.</p>
         <div class="animate-in">
             {% if current_user.is_authenticated %}
             <a href="{{ url_for('main.convert') }}" class="btn btn-primary">Start Converting</a>
@@ -63,7 +64,7 @@
         <div class="pricing-card">
             <span class="pricing-badge">Popular</span>
             <h3 style="font-size: 1.5rem; margin-top: 16px;">Pro</h3>
-            <div class="pricing-amount">99<span> UAH/mo</span></div>
+            <div class="pricing-amount">$9<span> /mo</span></div>
             <ul class="pricing-features">
                 <li>Unlimited Conversions</li>
                 <li>All File Formats</li>
@@ -79,4 +80,24 @@
         </div>
     </div>
 </section>
+
+<!-- SEO Block -->
+<section style="padding: 80px 0;">
+    <div class="container" style="max-width: 900px;">
+        <h2 style="font-size: 2rem; margin-bottom: 16px;">RAG Converter Pro for PDF and TXT Datasets</h2>
+        <p style="color: var(--text-muted); margin-bottom: 16px;">
+            RAG Converter Pro turns PDF and TXT documents into clean, chunked datasets ready for
+            retrieval-augmented generation pipelines. Upload a file, get normalized text, and download a
+            structured dataset in minutes.
+        </p>
+        <p style="color: var(--text-muted); margin-bottom: 16px;">
+            Use it to prepare knowledge bases for AI assistants, search, and internal documentation systems.
+            The converter handles page cleanup, smart chunking, and consistent formatting.
+        </p>
+        <p style="color: var(--text-muted);">
+            Learn more on the <a href="{{ url_for('main.about') }}">About</a> page or check the <a href="{{ url_for('main.faq') }}">FAQ</a>.
+        </p>
+    </div>
+</section>
 {% endblock %}
+

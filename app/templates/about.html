@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+
+{% block title %}About - RAG Converter Pro{% endblock %}
+{% block meta_description %}Learn about RAG Converter Pro, a simple tool to convert PDF and TXT files into clean datasets for RAG systems.{% endblock %}
+
+{% block content %}
+<section style="padding-top: 120px; padding-bottom: 80px;">
+    <div class="container" style="max-width: 900px;">
+        <h1>About RAG Converter Pro</h1>
+        <p style="color: var(--text-muted); margin-top: 12px;">
+            RAG Converter Pro is a lightweight web app that prepares documents for retrieval‑augmented generation.
+            It converts PDF and TXT files into clean, structured datasets that are easy to index and search.
+        </p>
+
+        <h2 style="margin-top: 32px;">What it does</h2>
+        <ul style="color: var(--text-muted); margin-top: 12px;">
+            <li>Extracts text from PDF and TXT files</li>
+            <li>Cleans headers, page numbers, and extra whitespace</li>
+            <li>Splits content into consistent chunks for RAG pipelines</li>
+            <li>Provides a ready‑to‑use dataset file</li>
+        </ul>
+
+        <h2 style="margin-top: 32px;">Who it is for</h2>
+        <p style="color: var(--text-muted); margin-top: 12px;">
+            Teams building AI assistants, support search, or internal knowledge bases can use RAG Converter Pro
+            to speed up data preparation and keep datasets consistent.
+        </p>
+    </div>
+</section>
+{% endblock %}

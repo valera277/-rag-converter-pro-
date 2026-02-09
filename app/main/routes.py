@@ -118,6 +118,18 @@ def refund_policy():
     return render_template('legal/refund_policy.html')
 
 
+@bp.route('/about')
+def about():
+    """Public about page."""
+    return render_template('about.html')
+
+
+@bp.route('/faq')
+def faq():
+    """Public FAQ page."""
+    return render_template('faq.html')
+
+
 @bp.route('/robots.txt')
 def robots_txt():
     base_url = request.url_root.rstrip('/')
@@ -137,6 +149,8 @@ def sitemap_xml():
         f"{base_url}{url_for('main.terms_and_conditions')}", 
         f"{base_url}{url_for('main.privacy_policy')}", 
         f"{base_url}{url_for('main.refund_policy')}",
+        f"{base_url}{url_for('main.about')}",
+        f"{base_url}{url_for('main.faq')}",
     ]
     items = "\n".join(
         f"<url><loc>{u}</loc><changefreq>weekly</changefreq><priority>1.0</priority></url>"
