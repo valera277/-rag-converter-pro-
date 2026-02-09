@@ -258,7 +258,7 @@ DATABASE_URL=<вставьте Internal Database URL из шага 3.2>
 
 # Paddle
 PADDLE_CLIENT_TOKEN=<your_client_token>
-PADDLE_PRICE_ID=<your_price_id>
+PADDLE_PRICE_ID=pri_01kh0xww2yy5zkmbmq2psgk93t
 PADDLE_WEBHOOK_SECRET=<your_webhook_secret>
 PADDLE_ENV=live
 

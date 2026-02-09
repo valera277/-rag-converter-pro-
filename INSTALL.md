@@ -76,7 +76,7 @@ DATABASE_URL=postgresql://postgres:ваш_пароль@localhost:5432/rag_conver
 
 # Ключи Paddle
 PADDLE_CLIENT_TOKEN=<your_client_token>
-PADDLE_PRICE_ID=<your_price_id>
+PADDLE_PRICE_ID=pri_01kh0xww2yy5zkmbmq2psgk93t
 PADDLE_WEBHOOK_SECRET=<your_webhook_secret>
 PADDLE_ENV=live
 PADDLE_WEBHOOK_URL=https://ваш-домен/payment/paddle/webhook
