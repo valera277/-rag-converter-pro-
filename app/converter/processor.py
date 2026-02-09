@@ -14,7 +14,7 @@ from pypdf import PdfReader
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 
 
-def read_file(filepath):
+def read_file(filepath, max_pdf_pages=None, max_text_chars=None):
     """
     Читает содержимое файла .txt или .pdf.
     
@@ -34,10 +34,17 @@ def read_file(filepath):
         if filename.lower().endswith(".txt"):
             # Чтение текстового файла в кодировке UTF-8
             with open(filepath, "r", encoding="utf-8") as f:
-                text = f.read()
+                if max_text_chars:
+                    text = f.read(max_text_chars + 1)
+                    if len(text) > max_text_chars:
+                        raise ValueError("Текстовый файл слишком большой для обработки.")
+                else:
+                    text = f.read()
         elif filename.lower().endswith(".pdf"):
             # Извлечение текста из всех страниц PDF
             reader = PdfReader(filepath)
+            if max_pdf_pages and len(reader.pages) > max_pdf_pages:
+                raise ValueError("PDF слишком большой (слишком много страниц).")
             for page in reader.pages:
                 page_text = page.extract_text()
                 if page_text:
@@ -142,7 +149,7 @@ def split_text(text, chunk_size=1000, chunk_overlap=200):
     return text_splitter.split_text(text)
 
 
-def process_files(filepaths, chunk_size=1000, chunk_overlap=200):
+def process_files(filepaths, chunk_size=1000, chunk_overlap=200, max_pdf_pages=None, max_text_chars=None, max_chunks=None):
     """
     Обрабатывает список файлов и создает dataset.md.
     
@@ -166,7 +173,7 @@ def process_files(filepaths, chunk_size=1000, chunk_overlap=200):
         filename = os.path.basename(filepath)
         
         # Чтение файла
-        text = read_file(filepath)
+        text = read_file(filepath, max_pdf_pages=max_pdf_pages, max_text_chars=max_text_chars)
         if not text:
             continue
         
@@ -175,6 +182,8 @@ def process_files(filepaths, chunk_size=1000, chunk_overlap=200):
         
         # Разбиение на чанки
         chunks = split_text(cleaned_text, chunk_size, chunk_overlap)
+        if max_chunks and len(chunks) > max_chunks:
+            raise ValueError("Файл слишком большой: получилось слишком много чанков.")
         
         # Формирование записей с метаданными
         for i, chunk in enumerate(chunks):

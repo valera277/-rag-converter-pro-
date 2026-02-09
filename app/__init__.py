@@ -68,7 +68,7 @@ def create_app(config_class=Config):
     from app.payment import bp as payment_bp
     app.register_blueprint(payment_bp, url_prefix='/payment')
     
-    # Exempt LiqPay callback from CSRF (uses signature check)
+    # Exempt payment callback from CSRF (uses signature check)
     csrf.exempt(payment_bp)
     
     # ===== ERROR HANDLERS =====

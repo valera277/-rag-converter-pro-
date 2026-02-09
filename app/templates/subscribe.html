@@ -24,17 +24,24 @@
                 <li>Cancel Anytime</li>
             </ul>
 
-            <!-- LiqPay Payment Form -->
-            <form method="POST" action="{{ liqpay_data.checkout_url }}" accept-charset="utf-8">
-                <input type="hidden" name="data" value="{{ liqpay_data.data }}">
-                <input type="hidden" name="signature" value="{{ liqpay_data.signature }}">
+            <!-- WayForPay Payment Form -->
+            <form method="POST" action="{{ wfp_data.action }}" accept-charset="utf-8">
+                {% for name, value in wfp_data.fields.items() %}
+                    {% if value is iterable and value is not string %}
+                        {% for item in value %}
+                            <input type="hidden" name="{{ name }}" value="{{ item }}">
+                        {% endfor %}
+                    {% else %}
+                        <input type="hidden" name="{{ name }}" value="{{ value }}">
+                    {% endif %}
+                {% endfor %}
                 <button type="submit" class="btn btn-primary" style="width: 100%;">
-                    Pay with LiqPay
+                    Pay with WayForPay
                 </button>
             </form>
 
             <p style="margin-top: 20px; font-size: 0.875rem; color: var(--text-muted);">
-                Secure payment via LiqPay. Subscription automatically renews every month.
+                Secure payment via WayForPay. Subscription automatically renews every month.
             </p>
         </div>
 

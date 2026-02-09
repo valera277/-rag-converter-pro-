@@ -1,4 +1,4 @@
-import os
+﻿import os
 import re
 import uuid
 from flask import render_template, redirect, url_for, flash, request, current_app, send_file, after_this_request, Response
@@ -100,6 +100,24 @@ def index():
     return render_template('index.html')
 
 
+@bp.route('/terms-and-conditions')
+def terms_and_conditions():
+    """Terms and conditions page (required for payment verification)."""
+    return render_template('legal/terms_and_conditions.html')
+
+
+@bp.route('/privacy-policy')
+def privacy_policy():
+    """Privacy policy page."""
+    return render_template('legal/privacy_policy.html')
+
+
+@bp.route('/refund-policy')
+def refund_policy():
+    """Refund policy page."""
+    return render_template('legal/refund_policy.html')
+
+
 @bp.route('/robots.txt')
 def robots_txt():
     base_url = request.url_root.rstrip('/')
@@ -115,7 +133,10 @@ Sitemap: {base_url}/sitemap.xml
 def sitemap_xml():
     base_url = request.url_root.rstrip('/')
     urls = [
-        f"{base_url}{url_for('main.index')}",
+        f"{base_url}{url_for('main.index')}", 
+        f"{base_url}{url_for('main.terms_and_conditions')}", 
+        f"{base_url}{url_for('main.privacy_policy')}", 
+        f"{base_url}{url_for('main.refund_policy')}",
     ]
     items = "\n".join(
         f"<url><loc>{u}</loc><changefreq>weekly</changefreq><priority>1.0</priority></url>"
@@ -264,3 +285,5 @@ def convert():
         'convert.html',
         max_pdf_pages=current_app.config.get('MAX_PDF_PAGES')
     )
+
+

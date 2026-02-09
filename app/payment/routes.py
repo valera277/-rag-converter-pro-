@@ -1,36 +1,32 @@
-import uuid
+﻿import uuid
 import logging
 from datetime import datetime, timedelta
-from flask import render_template, redirect, url_for, flash, request, current_app
+from flask import render_template, redirect, url_for, flash, request, current_app, jsonify
 from flask_login import login_required, current_user
 from app import db
 from app.payment import bp
-from app.payment.liqpay_client import LiqPayClient
+from app.payment.wayforpay_client import WayForPayClient
 
-# Настройка логирования для модуля платежей
 logger = logging.getLogger(__name__)
 
 
 def validate_order_id_format(order_id):
     """
-    Проверка формата order_id: sub_USERID_HASH
-    
-    Возвращает user_id если формат верный, иначе None.
-    Защита от подделки order_id.
+    Validate orderReference format: sub_USERID_HASH
+    Returns user_id if valid, otherwise None.
     """
     if not order_id or not isinstance(order_id, str):
         return None
-    
+
     parts = order_id.split('_')
     if len(parts) != 3 or parts[0] != 'sub':
         return None
-    
+
     try:
         user_id = int(parts[1])
-        # Проверка что хэш содержит 8 шестнадцатеричных символов
         if len(parts[2]) != 8:
             return None
-        int(parts[2], 16)  # Проверка что это hex
+        int(parts[2], 16)
         return user_id
     except (ValueError, TypeError):
         return None
@@ -40,110 +36,92 @@ def validate_order_id_format(order_id):
 @login_required
 def subscribe():
     """
-    Страница оформления подписки.
-    Генерирует форму оплаты LiqPay.
+    Subscription checkout page.
+    Generates WayForPay payment form.
     """
-    # Check for active or pending cancellation subscription
     if current_user.subscription and current_user.subscription.status in ['active', 'cancelled']:
         flash('You already have an active subscription.', 'info')
         return redirect(url_for('main.dashboard'))
-    
-    # Check LiqPay config
-    if not current_app.config.get('LIQPAY_PUBLIC_KEY') or not current_app.config.get('LIQPAY_PRIVATE_KEY'):
-        logger.error('LiqPay keys not configured')
+
+    if not current_app.config.get('WAYFORPAY_MERCHANT_ACCOUNT') or not current_app.config.get('WAYFORPAY_SECRET_KEY'):
+        logger.error('WayForPay keys not configured')
         flash('Payment system temporarily unavailable.', 'error')
         return redirect(url_for('main.dashboard'))
-    
-    # Создание клиента LiqPay
-    liqpay = LiqPayClient()
-    
-    # Генерация уникального ID заказа
+
+    wfp = WayForPayClient()
+
     order_id = f"sub_{current_user.id}_{uuid.uuid4().hex[:8]}"
-    
-    # URL для callback и редиректа после оплаты
+
     result_url = url_for('main.dashboard', _external=True)
     server_url = url_for('payment.callback', _external=True)
-    
+
     try:
-        # Создание данных для платежной формы
-        form_data = liqpay.create_subscription_form(
-            order_id=order_id,
+        form_data = wfp.build_subscription_form(
+            order_reference=order_id,
             amount=current_app.config['SUBSCRIPTION_PRICE'],
-            description='RAG Converter Pro - Monthly Subscription',
+            product_name='RAG Converter Pro - Monthly Subscription',
             result_url=result_url,
-            server_url=server_url
+            service_url=server_url
         )
     except Exception as e:
-        logger.error(f'Error creating LiqPay form: {e}')
+        logger.error(f'Error creating WayForPay form: {e}')
         flash('Error creating payment form.', 'error')
         return redirect(url_for('main.dashboard'))
-    
-    return render_template('subscribe.html', 
-                           liqpay_data=form_data,
-                           price=current_app.config['SUBSCRIPTION_PRICE'])
+
+    return render_template(
+        'subscribe.html',
+        wfp_data=form_data,
+        price=current_app.config['SUBSCRIPTION_PRICE']
+    )
 
 
 @bp.route('/callback', methods=['POST'])
 def callback():
     """
-    Обработка callback от LiqPay.
-    LiqPay отправляет POST-запрос при изменении статуса платежа.
-    
-    CSRF проверка отключена - используется проверка подписи.
+    WayForPay callback.
+    Verifies signature and updates subscription status.
     """
-    # Получение данных из запроса
-    data = request.form.get('data')
-    signature = request.form.get('signature')
-    
-    # Логирование попытки callback
-    logger.info(f'Получен callback LiqPay с IP {request.remote_addr}')
-    
-    if not data or not signature:
-        logger.warning('Callback LiqPay: отсутствует data или signature')
-        return 'Отсутствует data или signature', 400
-    
-    # Проверка наличия ключа LiqPay
-    if not current_app.config.get('LIQPAY_PRIVATE_KEY'):
-        logger.error('Callback LiqPay: приватный ключ не настроен')
-        return 'Ошибка конфигурации сервера', 500
-    
-    liqpay = LiqPayClient()
-    callback_data = liqpay.decode_callback(data, signature)
-    
-    # Проверка подписи
-    if callback_data is None:
-        logger.warning(f'Callback LiqPay: неверная подпись с IP {request.remote_addr}')
-        return 'Неверная подпись', 403
-    
-    # Извлечение данных платежа
-    order_id = callback_data.get('order_id', '')
-    status = callback_data.get('status')
-    
-    logger.info(f'Callback LiqPay: заказ={order_id}, статус={status}')
-    
-    # Валидация формата order_id
+    payload = request.get_json(silent=True) or request.form.to_dict(flat=True)
+
+    logger.info(f'Получен callback WayForPay с IP {request.remote_addr}')
+
+    if not payload:
+        logger.warning('Callback WayForPay: пустой payload')
+        return 'Empty payload', 400
+
+    if not current_app.config.get('WAYFORPAY_SECRET_KEY'):
+        logger.error('Callback WayForPay: SECRET_KEY не настроен')
+        return 'Server configuration error', 500
+
+    wfp = WayForPayClient()
+    if not wfp.verify_callback_signature(payload):
+        logger.warning(f'Callback WayForPay: неверная подпись с IP {request.remote_addr}')
+        return 'Invalid signature', 403
+
+    order_id = payload.get('orderReference', '')
+    status = payload.get('transactionStatus')
+
+    logger.info(f'Callback WayForPay: заказ={order_id}, статус={status}')
+
     user_id = validate_order_id_format(order_id)
     if user_id is None:
-        logger.warning(f'Callback LiqPay: неверный формат order_id: {order_id}')
-        return 'Неверный формат order_id', 400
-    
+        logger.warning(f'Callback WayForPay: неверный формат orderReference: {order_id}')
+        return 'Invalid orderReference', 400
+
     from app.models import User, Subscription
     user = User.query.get(user_id)
-    
+
     if not user:
-        logger.warning(f'Callback LiqPay: пользователь не найден: {user_id}')
-        return 'Пользователь не найден', 404
-    
+        logger.warning(f'Callback WayForPay: пользователь не найден: {user_id}')
+        return 'User not found', 404
+
     try:
-        # Обновление статуса подписки
-        if status in ['subscribed', 'success']:
-            # Активация подписки
+        if status in ['Approved', 'Success', 'success']:
             if user.subscription:
                 user.subscription.status = 'active'
                 user.subscription.liqpay_order_id = order_id
                 user.subscription.expires_at = datetime.utcnow() + timedelta(days=30)
             else:
-                # Создание новой записи подписки
                 subscription = Subscription(
                     user_id=user.id,
                     status='active',
@@ -151,27 +129,25 @@ def callback():
                     expires_at=datetime.utcnow() + timedelta(days=30)
                 )
                 db.session.add(subscription)
-            
+
             db.session.commit()
             logger.info(f'Подписка активирована для пользователя {user_id}')
-        
-        elif status in ['failure', 'error', 'unsubscribed']:
-            # Деактивация подписки
+
+        elif status in ['Declined', 'Expired', 'Refunded', 'Failure', 'Error', 'Cancelled', 'Voided']:
             if user.subscription:
                 user.subscription.status = 'inactive'
                 db.session.commit()
                 logger.info(f'Подписка деактивирована для пользователя {user_id}, статус: {status}')
-        
         else:
-            # Логирование неизвестных статусов
-            logger.info(f'Callback LiqPay: необработанный статус {status} для заказа {order_id}')
-        
+            logger.info(f'Callback WayForPay: необработанный статус {status} для заказа {order_id}')
+
     except Exception as e:
         db.session.rollback()
-        logger.error(f'Ошибка базы данных в callback LiqPay: {e}')
-        return 'Ошибка базы данных', 500
-    
-    return 'OK', 200
+        logger.error(f'Ошибка базы данных в callback WayForPay: {e}')
+        return 'Database error', 500
+
+    response_payload = wfp.build_callback_response(order_id, status='accept')
+    return jsonify(response_payload), 200
 
 
 @bp.route('/cancel', methods=['POST'])
@@ -179,35 +155,35 @@ def callback():
 def cancel():
     """
     Cancel subscription.
-    Deactivates user subscription.
+    Deactivates user subscription and stops recurring payments in WayForPay.
     """
     if not current_user.subscription or current_user.subscription.status != 'active':
         flash('No active subscription to cancel.', 'warning')
         return redirect(url_for('main.dashboard'))
-    
+
     try:
-        liqpay = LiqPayClient()
+        wfp = WayForPayClient()
         order_id = current_user.subscription.liqpay_order_id
-        
+
         if order_id:
-            # Call LiqPay API to unsubscribe
             logger.info(f'Subscription cancellation request for order {order_id}')
-            response = liqpay.unsubscribe(order_id)
-            if response.get('status') == 'unsubscribed':
-                logger.info('LiqPay unsubscribe success')
-            else:
-                logger.warning(f'LiqPay unsubscribe response: {response}')
-        
-        # Update status in database to cancelled
-        # User retains access until expires_at
+            payload = wfp.regular_request_payload('REMOVE', order_id)
+            try:
+                import requests
+                response = requests.post(wfp.REGULAR_API_URL, json=payload, timeout=10)
+                response.raise_for_status()
+                logger.info(f'WayForPay regularApi response: {response.text}')
+            except Exception as e:
+                logger.warning(f'WayForPay regularApi error: {e}')
+
         current_user.subscription.status = 'cancelled'
         db.session.commit()
-        
+
         flash('Subscription cancelled. It will remain active until the end of the paid period.', 'info')
-        
+
     except Exception as e:
         db.session.rollback()
         logger.error(f'Error cancelling subscription: {e}')
         flash('Error cancelling subscription. Please try again later.', 'error')
-    
+
     return redirect(url_for('main.dashboard'))

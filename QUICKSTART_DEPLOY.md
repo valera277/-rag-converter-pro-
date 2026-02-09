@@ -1,4 +1,4 @@
-# 🚀 Быстрый старт деплоя
+﻿# 🚀 Быстрый старт деплоя
 
 ## Подготовка (5 минут)
 
@@ -24,10 +24,39 @@
    git init
    git add .
    git commit -m "Initial commit"
+   git config --global user.email "valera277@gmail.com"
    git remote add origin https://github.com/ВАШ-USERNAME/rag-converter-pro.git
    git branch -M main
    git push -u origin main
    ```
+git config --global user.name "Valera"
+git config --global user.email "valera277@gmail.com"
+
+git add .
+git commit -m "Initial commit"
+git branch -M main
+git push -u origin main
+
+
+$env:Path = "C:\Program Files\Git\cmd;C:\Program Files\Git\bin;" + $env:Path
+git add .gitignore requirements.txt
+git commit -m "Track requirements.txt"
+git push
+
+$env:Path = "C:\Program Files\Git\cmd;C:\Program Files\Git\bin;" + $env:Path
+git add .gitignore runtime.txt
+git commit -m "Allow runtime.txt and pin Python 3.12"
+git push
+
+
+$env:Path = "C:\Program Files\Git\cmd;C:\Program Files\Git\bin;" + $env:Path
+git add Procfile
+git commit -m "Tune gunicorn for low-memory plan"
+git push
+
+В Render нажмите Manual Deploy → Deploy latest commit.
+
+
 
 ## Деплой на Render (10 минут)
 
@@ -56,8 +85,13 @@
    FLASK_ENV=production
    SECRET_KEY=<Generate>
    DATABASE_URL=<Internal Database URL из шага 2>
-   FREE_CONVERSIONS_LIMIT=3
+   WAYFORPAY_MERCHANT_ACCOUNT=<your_merchant_account>
+   WAYFORPAY_SECRET_KEY=<your_secret_key>
+   WAYFORPAY_MERCHANT_PASSWORD=<your_merchant_password>
+   WAYFORPAY_MERCHANT_DOMAIN=<your_domain>
+   FREE_CONVERSIONS_LIMIT=5
    SUBSCRIPTION_PRICE=99
+   PYTHON_VERSION = 3.12.7
    ```
 
 5. **Создайте сервис** → Подождите 5 минут
@@ -87,3 +121,4 @@ git push origin main
 ```
 
 Render автоматически обновит сайт!
+

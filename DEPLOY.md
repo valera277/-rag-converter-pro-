@@ -1,4 +1,4 @@
-# 🚀 Инструкция по деплою RAG Converter Pro
+﻿# 🚀 Инструкция по деплою RAG Converter Pro
 
 ## Варианты хостинга (от дешевого к дорогому)
 
@@ -256,9 +256,11 @@ FLASK_ENV=production
 SECRET_KEY=<нажмите Generate для автогенерации>
 DATABASE_URL=<вставьте Internal Database URL из шага 3.2>
 
-# LiqPay (если используете)
-LIQPAY_PUBLIC_KEY=ваш_публичный_ключ
-LIQPAY_PRIVATE_KEY=ваш_приватный_ключ
+# WayForPay
+WAYFORPAY_MERCHANT_ACCOUNT=<your_merchant_account>
+WAYFORPAY_SECRET_KEY=<your_secret_key>
+WAYFORPAY_MERCHANT_PASSWORD=<your_merchant_password>
+WAYFORPAY_MERCHANT_DOMAIN=<your_domain>
 
 # Настройки приложения
 FREE_CONVERSIONS_LIMIT=3
@@ -458,3 +460,4 @@ flask db upgrade
 Если возникнут вопросы - пишите в поддержку Render или проверяйте логи.
 
 Удачи! 🚀
+
