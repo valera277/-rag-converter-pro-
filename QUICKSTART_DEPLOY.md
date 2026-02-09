@@ -90,7 +90,7 @@ git push
    PADDLE_WEBHOOK_SECRET=<your_webhook_secret>
    PADDLE_ENV=live
    FREE_CONVERSIONS_LIMIT=5
-   SUBSCRIPTION_PRICE=99
+   SUBSCRIPTION_PRICE=9
    PYTHON_VERSION = 3.12.7
    ```
    В Paddle настройте webhook: `https://ваш-домен/payment/paddle/webhook`

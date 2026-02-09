@@ -80,6 +80,7 @@ PADDLE_PRICE_ID=pri_01kh0xww2yy5zkmbmq2psgk93t
 PADDLE_WEBHOOK_SECRET=<your_webhook_secret>
 PADDLE_ENV=live
 PADDLE_WEBHOOK_URL=https://ваш-домен/payment/paddle/webhook
+SUBSCRIPTION_PRICE=9
 ```
 
 #### Как получить ключи Paddle:

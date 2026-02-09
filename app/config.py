@@ -28,7 +28,7 @@ class Config:
     
     # ===== ЛИМИТЫ И ТАРИФЫ =====
     FREE_CONVERSIONS_LIMIT = 3  # Количество бесплатных конвертаций
-    SUBSCRIPTION_PRICE = 99  # Цена подписки в гривнах
+    SUBSCRIPTION_PRICE = 9  # Цена подписки в долларах
     
     # ===== НАСТРОЙКИ ЗАГРУЗКИ ФАЙЛОВ =====
     UPLOAD_FOLDER = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'uploads')
