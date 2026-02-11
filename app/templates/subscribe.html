@@ -45,7 +45,22 @@
 <script src="https://cdn.paddle.com/paddle/v2/paddle.js"></script>
 <script>
     Paddle.Environment.set("{{ 'sandbox' if paddle_env == 'sandbox' else 'production' }}");
-    Paddle.Initialize({ token: "{{ paddle_token }}" });
+    Paddle.Initialize({
+        token: "{{ paddle_token }}",
+        eventCallback: function (event) {
+            if (event && event.name === "checkout.completed" && typeof gtag === "function") {
+                const txId =
+                    (event.data && event.data.transaction_id) ||
+                    (event.data && event.data.id) ||
+                    "";
+
+                gtag("event", "conversion", {
+                    send_to: "AW-17942102489/Sz_MCJTp1vYbENmDu-tC",
+                    transaction_id: txId
+                });
+            }
+        }
+    });
 
     const checkoutBtn = document.getElementById("paddle-checkout-btn");
     checkoutBtn.addEventListener("click", function () {
