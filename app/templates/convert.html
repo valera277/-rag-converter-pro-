@@ -54,6 +54,7 @@
     const fileSize = document.getElementById('fileSize');
     const removeFile = document.getElementById('removeFile');
     const submitBtn = document.getElementById('submitBtn');
+    let selectedUploadFile = null;
 
     // Click to upload
     uploadZone.addEventListener('click', () => fileInput.click());
@@ -73,20 +74,31 @@
         uploadZone.classList.remove('dragover');
         const files = e.dataTransfer.files;
         if (files.length) {
-            fileInput.files = files;
-            showSelectedFile(files[0]);
+            selectedUploadFile = files[0];
+            // Some browsers do not allow direct assignment to input.files.
+            // Try to sync file input for native form behavior, but keep fallback in JS submit.
+            try {
+                const dt = new DataTransfer();
+                dt.items.add(selectedUploadFile);
+                fileInput.files = dt.files;
+            } catch (err) {
+                // Fallback path uses selectedUploadFile in submit handler.
+            }
+            showSelectedFile(selectedUploadFile);
         }
     });
 
     // File selected
     fileInput.addEventListener('change', (e) => {
         if (e.target.files.length) {
-            showSelectedFile(e.target.files[0]);
+            selectedUploadFile = e.target.files[0];
+            showSelectedFile(selectedUploadFile);
         }
     });
 
     // Remove file
     removeFile.addEventListener('click', () => {
+        selectedUploadFile = null;
         fileInput.value = '';
         selectedFile.style.display = 'none';
         uploadZone.style.display = 'block';
@@ -116,6 +128,9 @@
         submitBtn.textContent = 'Processing...';
 
         const formData = new FormData(e.target);
+        if (selectedUploadFile && !formData.get('file')) {
+            formData.set('file', selectedUploadFile);
+        }
 
         try {
             const response = await fetch(e.target.action, {
