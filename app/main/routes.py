@@ -130,6 +130,13 @@ def faq():
     return render_template('faq.html')
 
 
+@bp.route('/contact')
+@bp.route('/contact.html')
+def contact():
+    """Public contact page for ads and compliance checks."""
+    return render_template('contact.html')
+
+
 @bp.route('/robots.txt')
 def robots_txt():
     base_url = request.url_root.rstrip('/')
@@ -151,6 +158,7 @@ def sitemap_xml():
         f"{base_url}{url_for('main.refund_policy')}",
         f"{base_url}{url_for('main.about')}",
         f"{base_url}{url_for('main.faq')}",
+        f"{base_url}{url_for('main.contact')}",
     ]
     items = "\n".join(
         f"<url><loc>{u}</loc><changefreq>weekly</changefreq><priority>1.0</priority></url>"
