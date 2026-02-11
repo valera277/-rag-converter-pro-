@@ -33,13 +33,23 @@ def read_file(filepath, max_pdf_pages=None, max_text_chars=None):
     try:
         if filename.lower().endswith(".txt"):
             # Чтение текстового файла в кодировке UTF-8
-            with open(filepath, "r", encoding="utf-8") as f:
-                if max_text_chars:
-                    text = f.read(max_text_chars + 1)
-                    if len(text) > max_text_chars:
-                        raise ValueError("Текстовый файл слишком большой для обработки.")
-                else:
-                    text = f.read()
+            try:
+                with open(filepath, "r", encoding="utf-8") as f:
+                    if max_text_chars:
+                        text = f.read(max_text_chars + 1)
+                        if len(text) > max_text_chars:
+                            raise ValueError("Текстовый файл слишком большой для обработки.")
+                    else:
+                        text = f.read()
+            except UnicodeDecodeError:
+                # Fallback for legacy encodings often used in RU/UA texts
+                with open(filepath, "r", encoding="cp1251", errors="replace") as f:
+                    if max_text_chars:
+                        text = f.read(max_text_chars + 1)
+                        if len(text) > max_text_chars:
+                            raise ValueError("Текстовый файл слишком большой для обработки.")
+                    else:
+                        text = f.read()
         elif filename.lower().endswith(".pdf"):
             # Извлечение текста из всех страниц PDF
             reader = PdfReader(filepath)
@@ -49,6 +59,9 @@ def read_file(filepath, max_pdf_pages=None, max_text_chars=None):
                 page_text = page.extract_text()
                 if page_text:
                     text += page_text + "\n"
+    except ValueError:
+        # Keep business validation errors readable for the user
+        raise
     except Exception as e:
         raise Exception(f"Ошибка чтения файла {filename}: {e}")
     
@@ -179,9 +192,13 @@ def process_files(filepaths, chunk_size=1000, chunk_overlap=200, max_pdf_pages=N
         
         # Очистка текста
         cleaned_text = clean_text(text)
+        if not cleaned_text.strip():
+            raise ValueError(f"Файл {filename} не содержит извлекаемого текста.")
         
         # Разбиение на чанки
         chunks = split_text(cleaned_text, chunk_size, chunk_overlap)
+        if not chunks:
+            raise ValueError(f"Файл {filename} не содержит текста после очистки.")
         if max_chunks and len(chunks) > max_chunks:
             raise ValueError("Файл слишком большой: получилось слишком много чанков.")
         
@@ -190,6 +207,9 @@ def process_files(filepaths, chunk_size=1000, chunk_overlap=200, max_pdf_pages=N
             chunk_record = f"## Источник: {filename}, Чанк: {i+1}\n\n{chunk}\n\n---\n\n"
             all_chunks.append(chunk_record)
     
+    if not all_chunks:
+        raise ValueError("Не удалось сформировать dataset: нет данных для чанков.")
+
     # Создание временного файла с результатом
     result_file = tempfile.NamedTemporaryFile(
         mode='w',
