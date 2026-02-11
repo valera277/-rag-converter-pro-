@@ -32,7 +32,8 @@ class Config:
     
     # ===== НАСТРОЙКИ ЗАГРУЗКИ ФАЙЛОВ =====
     UPLOAD_FOLDER = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'uploads')
-    MAX_CONTENT_LENGTH = 16 * 1024 * 1024  # Максимальный размер файла: 16MB
+    # Allow override from environment and keep safer default for common PDFs.
+    MAX_CONTENT_LENGTH = int(os.environ.get('MAX_CONTENT_LENGTH', 32 * 1024 * 1024))
     ALLOWED_EXTENSIONS = {'txt', 'pdf'}  # Разрешенные расширения
     MAX_PDF_PAGES = 100  # Лимит страниц PDF для защиты от таймаутов
     MAX_TEXT_CHARS = 500_000  # Лимит символов текста для защиты от таймаутов

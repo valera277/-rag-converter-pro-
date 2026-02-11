@@ -3,6 +3,7 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager
 from flask_migrate import Migrate
 from flask_wtf.csrf import CSRFProtect
+from werkzeug.exceptions import RequestEntityTooLarge
 from app.config import Config
 import os
 import logging
@@ -84,6 +85,12 @@ def create_app(config_class=Config):
     @app.errorhandler(404)
     def not_found_error(error):
         return render_template('errors/404.html'), 404
+
+    @app.errorhandler(RequestEntityTooLarge)
+    @app.errorhandler(413)
+    def request_entity_too_large(error):
+        max_mb = int(app.config.get('MAX_CONTENT_LENGTH', 0) / (1024 * 1024))
+        return render_template('errors/413.html', max_mb=max_mb), 413
 
     @app.errorhandler(500)
     def internal_error(error):
