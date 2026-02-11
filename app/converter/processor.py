@@ -59,6 +59,12 @@ def read_file(filepath, max_pdf_pages=None, max_text_chars=None):
                 page_text = page.extract_text()
                 if page_text:
                     text += page_text + "\n"
+            if not text.strip():
+                raise ValueError(
+                    "В PDF не найден извлекаемый текст. "
+                    "Возможно, это скан/изображение. "
+                    "Сделайте OCR и повторите попытку."
+                )
     except ValueError:
         # Keep business validation errors readable for the user
         raise
@@ -193,7 +199,11 @@ def process_files(filepaths, chunk_size=1000, chunk_overlap=200, max_pdf_pages=N
         # Очистка текста
         cleaned_text = clean_text(text)
         if not cleaned_text.strip():
-            raise ValueError(f"Файл {filename} не содержит извлекаемого текста.")
+            # Fallback: preserve original text with minimal normalization
+            normalized_text = re.sub(r"\s+", " ", text).strip()
+            if not normalized_text:
+                raise ValueError(f"Файл {filename} не содержит извлекаемого текста.")
+            cleaned_text = normalized_text
         
         # Разбиение на чанки
         chunks = split_text(cleaned_text, chunk_size, chunk_overlap)
