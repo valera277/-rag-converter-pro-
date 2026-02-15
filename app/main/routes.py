@@ -131,15 +131,20 @@ def faq():
 
 
 @bp.route('/contact')
-@bp.route('/contact.html')
 def contact():
     """Public contact page for ads and compliance checks."""
     return render_template('contact.html')
 
 
+@bp.route('/contact.html')
+def contact_html_redirect():
+    """Redirect legacy contact URL to canonical route for cleaner indexing signals."""
+    return redirect(url_for('main.contact'), code=301)
+
+
 @bp.route('/robots.txt')
 def robots_txt():
-    base_url = request.url_root.rstrip('/')
+    base_url = current_app.config.get('CANONICAL_BASE_URL', request.url_root.rstrip('/')).rstrip('/')
     content = f"""User-agent: *
 Allow: /
 
@@ -150,7 +155,7 @@ Sitemap: {base_url}/sitemap.xml
 
 @bp.route('/sitemap.xml')
 def sitemap_xml():
-    base_url = request.url_root.rstrip('/')
+    base_url = current_app.config.get('CANONICAL_BASE_URL', request.url_root.rstrip('/')).rstrip('/')
     urls = [
         f"{base_url}{url_for('main.index')}", 
         f"{base_url}{url_for('main.terms_and_conditions')}", 

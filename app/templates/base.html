@@ -7,7 +7,7 @@
     <meta name="description" content="{% block meta_description %}RAG Converter Pro - Convert PDF and TXT files for RAG systems{% endblock %}">
     <meta name="author" content="RAG Converter Pro">
     <meta name="robots" content="index, follow">
-    <link rel="canonical" href="{{ request.url }}">
+    <link rel="canonical" href="{{ canonical_url }}">
     {% block og_title %}RAG Converter Pro{% endblock %}
     {% block og_description %}Convert PDF and TXT into clean, chunked datasets for RAG systems.{% endblock %}
     {% block og_type %}website{% endblock %}
@@ -15,7 +15,7 @@
     <meta property="og:type" content="{{ self.og_type() }}">
     <meta property="og:title" content="{{ self.og_title() }}">
     <meta property="og:description" content="{{ self.og_description() }}">
-    <meta property="og:url" content="{{ request.url }}">
+    <meta property="og:url" content="{{ canonical_url }}">
     <meta property="og:image" content="{{ url_for('static', filename='images/og-cover.png', _external=True) }}">
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="{{ self.og_title() }}">

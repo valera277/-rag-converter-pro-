@@ -1,4 +1,4 @@
-from flask import Flask, request, render_template
+from flask import Flask, request, render_template, redirect
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager
 from flask_migrate import Migrate
@@ -42,6 +42,10 @@ def create_app(config_class=Config):
     os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
     
     # ===== SECURITY MIDDLEWARE =====
+    canonical_base_url = app.config.get('CANONICAL_BASE_URL', '').rstrip('/')
+    canonical_host = ''
+    if canonical_base_url:
+        canonical_host = canonical_base_url.replace('https://', '').replace('http://', '').split('/')[0].lower()
     
     @app.after_request
     def add_security_headers(response):
@@ -53,10 +57,26 @@ def create_app(config_class=Config):
     @app.before_request
     def log_request_info():
         """Log security events."""
+        # Enforce one canonical host in production to prevent duplicate indexing.
+        if os.environ.get('FLASK_ENV') == 'production' and canonical_host and request.method in ['GET', 'HEAD']:
+            request_host = request.host.split(':')[0].lower()
+            if request_host != canonical_host:
+                path = request.full_path if request.query_string else request.path
+                if path.endswith('?'):
+                    path = path[:-1]
+                return redirect(f"{canonical_base_url}{path}", code=301)
+
         if request.endpoint in ['auth.login', 'auth.register', 'payment.callback']:
             app.logger.info(
                 f"Security event: {request.endpoint} from IP {request.remote_addr}"
             )
+
+    @app.context_processor
+    def inject_canonical_url():
+        path = request.path or '/'
+        if canonical_base_url:
+            return {'canonical_url': f"{canonical_base_url}{path}"}
+        return {'canonical_url': request.base_url}
     
     # ===== BLUEPRINT REGISTRATION =====
     

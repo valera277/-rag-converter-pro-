@@ -8,7 +8,16 @@ class Config:
     """Конфигурация приложения Flask."""
     
     # ===== ОСНОВНЫЕ НАСТРОЙКИ FLASK =====
-    SECRET_KEY = os.environ.get('SECRET_KEY') or 'dev-secret-key-change-me'
+    # КРИТИЧНО: SECRET_KEY ДОЛЖЕН быть установлен в production!
+    SECRET_KEY = os.environ.get('SECRET_KEY')
+    if not SECRET_KEY:
+        if os.environ.get('FLASK_ENV') == 'production':
+            raise ValueError(
+                'КРИТИЧЕСКАЯ ОШИБКА: SECRET_KEY не установлен в production окружении! '
+                'Установите переменную окружения SECRET_KEY перед запуском.'
+            )
+        # Только для разработки
+        SECRET_KEY = 'dev-secret-key-change-me'
     
     # ===== БАЗА ДАННЫХ PostgreSQL =====
     # Render использует postgres://, но SQLAlchemy требует postgresql://
@@ -16,15 +25,35 @@ class Config:
     if DATABASE_URL and DATABASE_URL.startswith("postgres://"):
         DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql://", 1)
     
+    if not DATABASE_URL and os.environ.get('FLASK_ENV') == 'production':
+        raise ValueError(
+            'КРИТИЧЕСКАЯ ОШИБКА: DATABASE_URL не установлен в production! '
+            'Установите переменную окружения DATABASE_URL перед запуском.'
+        )
+    
     SQLALCHEMY_DATABASE_URI = DATABASE_URL or \
         'postgresql://postgres:password@localhost:5432/rag_converter'
     SQLALCHEMY_TRACK_MODIFICATIONS = False
+
+    # ===== SEO / КАНОНИЧЕСКИЙ ДОМЕН =====
+    # Единый домен для canonical URL, sitemap и редиректов с зеркал.
+    CANONICAL_BASE_URL = os.environ.get('CANONICAL_BASE_URL', 'https://ragconvert.com').rstrip('/')
     
     # ===== НАСТРОЙКИ Paddle =====
     PADDLE_CLIENT_TOKEN = os.environ.get('PADDLE_CLIENT_TOKEN')
     PADDLE_PRICE_ID = os.environ.get('PADDLE_PRICE_ID')
     PADDLE_WEBHOOK_SECRET = os.environ.get('PADDLE_WEBHOOK_SECRET')
     PADDLE_ENV = os.environ.get('PADDLE_ENV', 'live')
+    
+    # Предупреждение если Paddle не настроен для платежей
+    if os.environ.get('FLASK_ENV') == 'production':
+        if not PADDLE_CLIENT_TOKEN or not PADDLE_WEBHOOK_SECRET:
+            import warnings
+            warnings.warn(
+                'WARNING: Paddle не полностью настроен. '
+                'Платежи могут быть недоступны. '
+                'Установите PADDLE_CLIENT_TOKEN и PADDLE_WEBHOOK_SECRET.'
+            )
     
     # ===== ЛИМИТЫ И ТАРИФЫ =====
     FREE_CONVERSIONS_LIMIT = 3  # Количество бесплатных конвертаций
