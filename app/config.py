@@ -41,14 +41,17 @@ class Config:
 
     # ===== ПРОЗРАЧНОСТЬ ОПЕРАТОРА СЕРВИСА (ADS COMPLIANCE) =====
     # Данные владельца сайта (физлицо/самозанятый/ИП) для публичного раскрытия.
-    SERVICE_OPERATOR_NAME = os.environ.get('SERVICE_OPERATOR_NAME', 'Website Owner')
+    SERVICE_OPERATOR_NAME = os.environ.get('SERVICE_OPERATOR_NAME', 'Valerii Ohiienko')
     SERVICE_OPERATOR_STATUS = os.environ.get('SERVICE_OPERATOR_STATUS', 'Individual')
-    SERVICE_OPERATOR_EMAIL = os.environ.get('SERVICE_OPERATOR_EMAIL', 'support@ragconvert.com')
-    SERVICE_OPERATOR_PHONE = os.environ.get('SERVICE_OPERATOR_PHONE', '')
-    SERVICE_OPERATOR_ADDRESS = os.environ.get('SERVICE_OPERATOR_ADDRESS', '')
-    SERVICE_OPERATOR_COUNTRY = os.environ.get('SERVICE_OPERATOR_COUNTRY', '')
-    SERVICE_OPERATOR_HOURS = os.environ.get('SERVICE_OPERATOR_HOURS', '')
-    SERVICE_OPERATOR_TAX_ID = os.environ.get('SERVICE_OPERATOR_TAX_ID', '')
+    SERVICE_OPERATOR_EMAIL = os.environ.get('SERVICE_OPERATOR_EMAIL', 'valera277@gmail.com')
+    SERVICE_OPERATOR_PHONE = os.environ.get('SERVICE_OPERATOR_PHONE', '+380688505814')
+    SERVICE_OPERATOR_ADDRESS = os.environ.get(
+        'SERVICE_OPERATOR_ADDRESS',
+        'Spasivska St, 19, ap. 118, Kryvyi Rih, 50000, Ukraine'
+    )
+    SERVICE_OPERATOR_COUNTRY = os.environ.get('SERVICE_OPERATOR_COUNTRY', 'Ukraine')
+    SERVICE_OPERATOR_HOURS = os.environ.get('SERVICE_OPERATOR_HOURS', '09:00-17:00 Europe/Kyiv')
+    SERVICE_OPERATOR_TAX_ID = os.environ.get('SERVICE_OPERATOR_TAX_ID', '2664203872')
     SERVICE_OPERATOR_REGISTRY_ID = os.environ.get('SERVICE_OPERATOR_REGISTRY_ID', '')
     
     # ===== НАСТРОЙКИ Paddle =====

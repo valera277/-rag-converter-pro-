@@ -13,6 +13,8 @@
             This website is operated by {{ operator_info.name }}{% if operator_info.status %} ({{ operator_info.status }}){% endif %}.
             Contact email: <a href="mailto:{{ operator_info.email }}">{{ operator_info.email }}</a>{% if operator_info.phone %}, phone: {{ operator_info.phone }}{% endif %}.
             {% if operator_info.address %}Address: {{ operator_info.address }}.{% endif %}
+            {% if operator_info.tax_id %} Tax ID: {{ operator_info.tax_id }}.{% endif %}
+            {% if operator_info.hours %} Support hours: {{ operator_info.hours }}.{% endif %}
         </p>
 
         <h2>2. Service Description</h2>

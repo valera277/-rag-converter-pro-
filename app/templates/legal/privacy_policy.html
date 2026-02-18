@@ -11,7 +11,9 @@
         <h2>1. Data Controller</h2>
         <p>
             The data controller for this website is {{ operator_info.name }}{% if operator_info.status %} ({{ operator_info.status }}){% endif %}.
-            Contact: <a href="mailto:{{ operator_info.email }}">{{ operator_info.email }}</a>.
+            Contact: <a href="mailto:{{ operator_info.email }}">{{ operator_info.email }}</a>{% if operator_info.phone %}, {{ operator_info.phone }}{% endif %}.
+            {% if operator_info.address %} Address: {{ operator_info.address }}.{% endif %}
+            {% if operator_info.tax_id %} Tax ID: {{ operator_info.tax_id }}.{% endif %}
         </p>
 
         <h2>2. Data We Collect</h2>
