@@ -25,6 +25,14 @@
             Teams building AI assistants, support search, or internal knowledge bases can use RAG Converter Pro
             to speed up data preparation and keep datasets consistent.
         </p>
+
+        <h2 style="margin-top: 32px;">Service Operator</h2>
+        <p style="color: var(--text-muted); margin-top: 12px;">
+            This service is operated by {{ operator_info.name }}{% if operator_info.status %} ({{ operator_info.status }}){% endif %}.
+            {% if operator_info.country %}Country: {{ operator_info.country }}.{% endif %}
+            {% if operator_info.address %} Address: {{ operator_info.address }}.{% endif %}
+            Contact: <a href="mailto:{{ operator_info.email }}">{{ operator_info.email }}</a>{% if operator_info.phone %}, {{ operator_info.phone }}{% endif %}.
+        </p>
     </div>
 </section>
 {% endblock %}

@@ -74,9 +74,23 @@ def create_app(config_class=Config):
     @app.context_processor
     def inject_canonical_url():
         path = request.path or '/'
+        operator_info = {
+            'name': app.config.get('SERVICE_OPERATOR_NAME', ''),
+            'status': app.config.get('SERVICE_OPERATOR_STATUS', ''),
+            'email': app.config.get('SERVICE_OPERATOR_EMAIL', ''),
+            'phone': app.config.get('SERVICE_OPERATOR_PHONE', ''),
+            'address': app.config.get('SERVICE_OPERATOR_ADDRESS', ''),
+            'country': app.config.get('SERVICE_OPERATOR_COUNTRY', ''),
+            'hours': app.config.get('SERVICE_OPERATOR_HOURS', ''),
+            'tax_id': app.config.get('SERVICE_OPERATOR_TAX_ID', ''),
+            'registry_id': app.config.get('SERVICE_OPERATOR_REGISTRY_ID', ''),
+        }
         if canonical_base_url:
-            return {'canonical_url': f"{canonical_base_url}{path}"}
-        return {'canonical_url': request.base_url}
+            return {
+                'canonical_url': f"{canonical_base_url}{path}",
+                'operator_info': operator_info
+            }
+        return {'canonical_url': request.base_url, 'operator_info': operator_info}
     
     # ===== BLUEPRINT REGISTRATION =====
     

@@ -38,6 +38,18 @@ class Config:
     # ===== SEO / КАНОНИЧЕСКИЙ ДОМЕН =====
     # Единый домен для canonical URL, sitemap и редиректов с зеркал.
     CANONICAL_BASE_URL = os.environ.get('CANONICAL_BASE_URL', 'https://ragconvert.com').rstrip('/')
+
+    # ===== ПРОЗРАЧНОСТЬ ОПЕРАТОРА СЕРВИСА (ADS COMPLIANCE) =====
+    # Данные владельца сайта (физлицо/самозанятый/ИП) для публичного раскрытия.
+    SERVICE_OPERATOR_NAME = os.environ.get('SERVICE_OPERATOR_NAME', 'Website Owner')
+    SERVICE_OPERATOR_STATUS = os.environ.get('SERVICE_OPERATOR_STATUS', 'Individual')
+    SERVICE_OPERATOR_EMAIL = os.environ.get('SERVICE_OPERATOR_EMAIL', 'support@ragconvert.com')
+    SERVICE_OPERATOR_PHONE = os.environ.get('SERVICE_OPERATOR_PHONE', '')
+    SERVICE_OPERATOR_ADDRESS = os.environ.get('SERVICE_OPERATOR_ADDRESS', '')
+    SERVICE_OPERATOR_COUNTRY = os.environ.get('SERVICE_OPERATOR_COUNTRY', '')
+    SERVICE_OPERATOR_HOURS = os.environ.get('SERVICE_OPERATOR_HOURS', '')
+    SERVICE_OPERATOR_TAX_ID = os.environ.get('SERVICE_OPERATOR_TAX_ID', '')
+    SERVICE_OPERATOR_REGISTRY_ID = os.environ.get('SERVICE_OPERATOR_REGISTRY_ID', '')
     
     # ===== НАСТРОЙКИ Paddle =====
     PADDLE_CLIENT_TOKEN = os.environ.get('PADDLE_CLIENT_TOKEN')

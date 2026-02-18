@@ -6,7 +6,7 @@
 <div style="padding-top: 120px;">
     <div class="container" style="max-width: 900px;">
         <h1>Refund Policy</h1>
-        <p>Last updated: 2026-02-11</p>
+        <p>Last updated: 2026-02-18</p>
 
         <h2>1. Refund window</h2>
         <p>Refund requests must be submitted within 14 days of the transaction date.</p>
@@ -20,7 +20,7 @@
         <p>You can cancel your subscription at any time. Cancellation stops future renewals.</p>
 
         <h2>4. Contact</h2>
-        <p>Refund and billing support: support@ragconvert.com</p>
+        <p>Refund and billing support: <a href="mailto:{{ operator_info.email }}">{{ operator_info.email }}</a>{% if operator_info.phone %}, {{ operator_info.phone }}{% endif %}</p>
     </div>
 </div>
 {% endblock %}

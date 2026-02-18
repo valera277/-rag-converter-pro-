@@ -78,6 +78,18 @@
         <div class="container">
             <p>&copy; 2026 RAG Converter Pro. All rights reserved.</p>
             <p style="margin-top: 8px;">
+                Service operator: {{ operator_info.name }}
+                {% if operator_info.status %}({{ operator_info.status }}){% endif %}
+                {% if operator_info.country %}, {{ operator_info.country }}{% endif %}
+            </p>
+            {% if operator_info.address %}
+            <p style="margin-top: 4px;">Address: {{ operator_info.address }}</p>
+            {% endif %}
+            <p style="margin-top: 4px;">
+                Email: <a href="mailto:{{ operator_info.email }}">{{ operator_info.email }}</a>
+                {% if operator_info.phone %} | Phone: {{ operator_info.phone }}{% endif %}
+            </p>
+            <p style="margin-top: 8px;">
                 <a href="{{ url_for('main.terms_and_conditions') }}">Terms</a>
                 | <a href="{{ url_for('main.privacy_policy') }}">Privacy</a>
                 | <a href="{{ url_for('main.refund_policy') }}">Refunds</a>

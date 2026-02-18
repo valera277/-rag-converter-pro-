@@ -6,22 +6,28 @@
 <div style="padding-top: 120px;">
     <div class="container" style="max-width: 900px;">
         <h1>Privacy Policy</h1>
-        <p>Last updated: 2026-02-09</p>
+        <p>Last updated: 2026-02-18</p>
 
-        <h2>1. Data We Collect</h2>
+        <h2>1. Data Controller</h2>
+        <p>
+            The data controller for this website is {{ operator_info.name }}{% if operator_info.status %} ({{ operator_info.status }}){% endif %}.
+            Contact: <a href="mailto:{{ operator_info.email }}">{{ operator_info.email }}</a>.
+        </p>
+
+        <h2>2. Data We Collect</h2>
         <p>We collect account data (email), payment status, and usage metrics. Uploaded files are processed and deleted after conversion.</p>
 
-        <h2>2. Purpose of Processing</h2>
+        <h2>3. Purpose of Processing</h2>
         <p>Data is used to provide and improve the service, manage subscriptions, and ensure security.</p>
 
-        <h2>3. Data Sharing</h2>
+        <h2>4. Data Sharing</h2>
         <p>Payments are processed by our payment provider. We do not sell your personal data.</p>
 
-        <h2>4. Data Retention</h2>
+        <h2>5. Data Retention</h2>
         <p>We retain data only as long as necessary for service delivery and legal compliance.</p>
 
-        <h2>5. Contact</h2>
-        <p>Privacy inquiries: support@ragconvert.com</p>
+        <h2>6. Contact</h2>
+        <p>Privacy inquiries: <a href="mailto:{{ operator_info.email }}">{{ operator_info.email }}</a></p>
     </div>
 </div>
 {% endblock %}

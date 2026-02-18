@@ -10,10 +10,27 @@
     <div class="container" style="max-width: 900px;">
         <h1>Contact</h1>
         <p style="color: var(--text-muted); margin-top: 12px;">
-            For support requests related to billing, subscription, and product usage, contact us at:
+            This website is operated by an individual service provider. For support requests related to billing,
+            subscription, and product usage, use the contact details below.
         </p>
-        <p style="margin-top: 12px;">
-            <a href="mailto:support@ragconvert.com">support@ragconvert.com</a>
+
+        <h2 style="margin-top: 32px;">Service Operator Details</h2>
+        <ul style="color: var(--text-muted); margin-top: 12px;">
+            <li>Name: {{ operator_info.name }}</li>
+            <li>Status: {{ operator_info.status or 'Individual' }}</li>
+            <li>Email: <a href="mailto:{{ operator_info.email }}">{{ operator_info.email }}</a></li>
+            {% if operator_info.phone %}<li>Phone: {{ operator_info.phone }}</li>{% endif %}
+            {% if operator_info.address %}<li>Address: {{ operator_info.address }}</li>{% endif %}
+            {% if operator_info.country %}<li>Country: {{ operator_info.country }}</li>{% endif %}
+            {% if operator_info.hours %}<li>Working hours: {{ operator_info.hours }}</li>{% endif %}
+            {% if operator_info.tax_id %}<li>Tax ID: {{ operator_info.tax_id }}</li>{% endif %}
+            {% if operator_info.registry_id %}<li>Registry ID: {{ operator_info.registry_id }}</li>{% endif %}
+        </ul>
+
+        <h2 style="margin-top: 32px;">Compliance Notice</h2>
+        <p style="color: var(--text-muted); margin-top: 12px;">
+            We do not represent government institutions, third-party brands, or organizations.
+            We provide only services that are explicitly described on this website.
         </p>
     </div>
 </section>

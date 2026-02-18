@@ -6,28 +6,35 @@
 <div style="padding-top: 120px;">
     <div class="container" style="max-width: 900px;">
         <h1>Terms and Conditions</h1>
-        <p>Last updated: 2026-02-09</p>
+        <p>Last updated: 2026-02-18</p>
 
-        <h2>1. Service Description</h2>
+        <h2>1. Service Operator Information</h2>
+        <p>
+            This website is operated by {{ operator_info.name }}{% if operator_info.status %} ({{ operator_info.status }}){% endif %}.
+            Contact email: <a href="mailto:{{ operator_info.email }}">{{ operator_info.email }}</a>{% if operator_info.phone %}, phone: {{ operator_info.phone }}{% endif %}.
+            {% if operator_info.address %}Address: {{ operator_info.address }}.{% endif %}
+        </p>
+
+        <h2>2. Service Description</h2>
         <p>RAG Converter Pro provides file conversion services (PDF/TXT to dataset format) via a web application.</p>
 
-        <h2>2. Subscription</h2>
+        <h2>3. Subscription</h2>
         <p>Subscriptions are billed monthly and renew automatically unless cancelled. By purchasing a subscription, you authorize recurring payments.</p>
 
-        <h2>3. Acceptable Use</h2>
+        <h2>4. Acceptable Use</h2>
         <p>You agree not to upload illegal content or content that violates third‑party rights.</p>
 
-        <h2>4. Account</h2>
+        <h2>5. Account</h2>
         <p>You are responsible for maintaining the confidentiality of your account credentials.</p>
 
-        <h2>5. Disclaimer</h2>
+        <h2>6. Disclaimer</h2>
         <p>The service is provided "as is" without warranties of any kind.</p>
 
-        <h2>6. Limitation of Liability</h2>
+        <h2>7. Limitation of Liability</h2>
         <p>To the fullest extent permitted by law, we are not liable for indirect or consequential damages.</p>
 
-        <h2>7. Contact</h2>
-        <p>Support: support@ragconvert.com</p>
+        <h2>8. Contact</h2>
+        <p>Support: <a href="mailto:{{ operator_info.email }}">{{ operator_info.email }}</a></p>
     </div>
 </div>
 {% endblock %}
