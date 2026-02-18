@@ -124,6 +124,13 @@ def about():
     return render_template('about.html')
 
 
+@bp.route('/about/')
+@bp.route('/about.html')
+def about_legacy_redirect():
+    """Redirect non-canonical about URLs to the canonical route."""
+    return redirect(url_for('main.about'), code=301)
+
+
 @bp.route('/faq')
 def faq():
     """Public FAQ page."""

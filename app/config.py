@@ -38,6 +38,8 @@ class Config:
     # ===== SEO / КАНОНИЧЕСКИЙ ДОМЕН =====
     # Единый домен для canonical URL, sitemap и редиректов с зеркал.
     CANONICAL_BASE_URL = os.environ.get('CANONICAL_BASE_URL', 'https://ragconvert.com').rstrip('/')
+    # Принудительный 301 редирект на канонический домен (кроме localhost/127.0.0.1).
+    FORCE_CANONICAL_REDIRECT = os.environ.get('FORCE_CANONICAL_REDIRECT', '1') == '1'
 
     # ===== ПРОЗРАЧНОСТЬ ОПЕРАТОРА СЕРВИСА (ADS COMPLIANCE) =====
     # Данные владельца сайта (физлицо/самозанятый/ИП) для публичного раскрытия.

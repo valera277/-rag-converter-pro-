@@ -46,6 +46,7 @@ def create_app(config_class=Config):
     canonical_host = ''
     if canonical_base_url:
         canonical_host = canonical_base_url.replace('https://', '').replace('http://', '').split('/')[0].lower()
+    force_canonical_redirect = app.config.get('FORCE_CANONICAL_REDIRECT', False)
     
     @app.after_request
     def add_security_headers(response):
@@ -57,10 +58,11 @@ def create_app(config_class=Config):
     @app.before_request
     def log_request_info():
         """Log security events."""
-        # Enforce one canonical host in production to prevent duplicate indexing.
-        if os.environ.get('FLASK_ENV') == 'production' and canonical_host and request.method in ['GET', 'HEAD']:
+        # Enforce one canonical host to prevent duplicate indexing.
+        if force_canonical_redirect and canonical_host and request.method in ['GET', 'HEAD']:
             request_host = request.host.split(':')[0].lower()
-            if request_host != canonical_host:
+            is_local_host = request_host in ['localhost', '127.0.0.1', '::1']
+            if request_host != canonical_host and not is_local_host:
                 path = request.full_path if request.query_string else request.path
                 if path.endswith('?'):
                     path = path[:-1]
