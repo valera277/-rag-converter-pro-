@@ -464,3 +464,5 @@ flask db upgrade
 
 Удачи! 🚀
 
+
+<!-- redeploy-trigger: 2026-02-18 -->
