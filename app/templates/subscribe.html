@@ -24,13 +24,14 @@
                 <li>Cancel Anytime</li>
             </ul>
 
-            <!-- Paddle Checkout -->
-            <button type="button" class="btn btn-primary" style="width: 100%;" id="paddle-checkout-btn">
-                Pay with Paddle
-            </button>
+            <!-- PayPro Global Checkout -->
+            <a href="{{ paypro_checkout_url }}&x-user-id={{ user_id }}" class="btn btn-primary"
+                style="width: 100%; text-decoration: none; display: inline-block; text-align: center;">
+                Pay with PayPro Global
+            </a>
 
             <p style="margin-top: 20px; font-size: 0.875rem; color: var(--text-muted);">
-                Secure payment via Paddle. Subscription automatically renews every month.
+                Secure payment via PayPro Global. Subscription automatically renews every month.
             </p>
         </div>
 
@@ -42,35 +43,7 @@
 {% endblock %}
 
 {% block scripts %}
-<script src="https://cdn.paddle.com/paddle/v2/paddle.js"></script>
 <script>
-    Paddle.Environment.set("{{ 'sandbox' if paddle_env == 'sandbox' else 'production' }}");
-    Paddle.Initialize({
-        token: "{{ paddle_token }}",
-        eventCallback: function (event) {
-            if (event && event.name === "checkout.completed" && typeof gtag === "function") {
-                const txId =
-                    (event.data && event.data.transaction_id) ||
-                    (event.data && event.data.id) ||
-                    "";
-
-                gtag("event", "conversion", {
-                    send_to: "AW-17942102489/Sz_MCJTp1vYbENmDu-tC",
-                    transaction_id: txId
-                });
-            }
-        }
-    });
-
-    const checkoutBtn = document.getElementById("paddle-checkout-btn");
-    checkoutBtn.addEventListener("click", function () {
-        Paddle.Checkout.open({
-            items: [
-                { priceId: "{{ paddle_price_id }}", quantity: 1 }
-            ],
-            customer: { email: "{{ user_email }}" },
-            customData: { user_id: "{{ user_id }}" }
-        });
-    });
+    // Google Ads conversion tracking can be added here if needed for PayPro Global
 </script>
 {% endblock %}

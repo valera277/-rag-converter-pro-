@@ -56,20 +56,21 @@ class Config:
     SERVICE_OPERATOR_TAX_ID = os.environ.get('SERVICE_OPERATOR_TAX_ID', '2664203872')
     SERVICE_OPERATOR_REGISTRY_ID = os.environ.get('SERVICE_OPERATOR_REGISTRY_ID', '')
     
-    # ===== НАСТРОЙКИ Paddle =====
-    PADDLE_CLIENT_TOKEN = os.environ.get('PADDLE_CLIENT_TOKEN')
-    PADDLE_PRICE_ID = os.environ.get('PADDLE_PRICE_ID')
-    PADDLE_WEBHOOK_SECRET = os.environ.get('PADDLE_WEBHOOK_SECRET')
-    PADDLE_ENV = os.environ.get('PADDLE_ENV', 'live')
+    # ===== PayPro Global =====
+    PAYPRO_PRODUCT_ID = os.environ.get('PAYPRO_PRODUCT_ID', '126768')
+    PAYPRO_SECRET_KEY = os.environ.get('PAYPRO_SECRET_KEY')
+    PAYPRO_CHECKOUT_URL = os.environ.get(
+        'PAYPRO_CHECKOUT_URL', 
+        'https://store.payproglobal.com/checkout?products[1][id]=126768'
+    )
     
-    # Предупреждение если Paddle не настроен для платежей
+    # Предупреждение если PayPro Global не настроен
     if os.environ.get('FLASK_ENV') == 'production':
-        if not PADDLE_CLIENT_TOKEN or not PADDLE_WEBHOOK_SECRET:
+        if not PAYPRO_SECRET_KEY:
             import warnings
             warnings.warn(
-                'WARNING: Paddle не полностью настроен. '
-                'Платежи могут быть недоступны. '
-                'Установите PADDLE_CLIENT_TOKEN и PADDLE_WEBHOOK_SECRET.'
+                'WARNING: PayPro Global SECRET_KEY не установлен. '
+                'Верификация платежей будет недоступна.'
             )
     
     # ===== ЛИМИТЫ И ТАРИФЫ =====
@@ -112,7 +113,7 @@ class Config:
         'X-Frame-Options': 'SAMEORIGIN',  # Защита от кликджекинга
         'X-XSS-Protection': '1; mode=block',  # Защита от XSS
         'Strict-Transport-Security': 'max-age=31536000; includeSubDomains',  # Принудительный HTTPS
-        'Content-Security-Policy': "default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.paddle.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data:; frame-src 'self' https://checkout.paddle.com https://*.paddle.com; form-action 'self' https://checkout.paddle.com"
+        'Content-Security-Policy': "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data:; frame-src 'self' https://store.payproglobal.com; form-action 'self' https://store.payproglobal.com"
     }
 
 

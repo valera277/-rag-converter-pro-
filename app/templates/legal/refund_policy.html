@@ -10,17 +10,20 @@
 
         <h2>1. Refund window</h2>
         <p>Refund requests must be submitted within 14 days of the transaction date.</p>
-        <p>For subscriptions, refund requests must be submitted within 14 days of the initial purchase or within 14 days of the latest renewal date.</p>
+        <p>For subscriptions, refund requests must be submitted within 14 days of the initial purchase or within 14 days
+            of the latest renewal date.</p>
 
         <h2>2. How refunds are handled</h2>
-        <p>All refunds are processed by Paddle as the merchant of record and are handled in accordance with Paddle's refund policy.</p>
+        <p>All refunds are processed by PayPro Global as our payment partner and are handled in accordance with their
+            refund policy.</p>
         <p>Approved refunds are returned to the original payment method.</p>
 
         <h2>3. Subscription cancellation</h2>
         <p>You can cancel your subscription at any time. Cancellation stops future renewals.</p>
 
         <h2>4. Contact</h2>
-        <p>Refund and billing support: <a href="mailto:{{ operator_info.email }}">{{ operator_info.email }}</a>{% if operator_info.phone %}, {{ operator_info.phone }}{% endif %}</p>
+        <p>Refund and billing support: <a href="mailto:{{ operator_info.email }}">{{ operator_info.email }}</a>{% if
+            operator_info.phone %}, {{ operator_info.phone }}{% endif %}</p>
     </div>
 </div>
 {% endblock %}
